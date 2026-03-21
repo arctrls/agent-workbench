@@ -2,13 +2,12 @@
 
 ## Project Structure & Module Organization
 
-This repository is the source of truth for personal AI tooling configuration. Keep edits here first, then sync to home directories.
+This repository is the source of truth for personal Codex tooling configuration. Keep edits here first, then sync to home directories.
 
 - `codex/`: Codex prompts, skills, `config.base.toml`, `AGENTS.user.md`, and `sync.sh`
-- `claude/`: Claude commands, agents, docs, skills, presets, and `sync.sh`
 - `scripts/`: repository maintenance utilities such as secret checks
 
-Do not edit generated files in `~/.codex`, `~/.claude`, or `~/AGENTS.md` directly.
+Do not edit generated files in `~/.codex` or `~/AGENTS.md` directly.
 
 ## Build, Test, and Development Commands
 
@@ -16,8 +15,6 @@ This repo has no app build pipeline. The main workflow is validation plus sync:
 
 - `./codex/sync.sh`: sync `codex/` into home config and generate `~/AGENTS.md`
 - `./codex/sync.sh --dry-run`: preview Codex sync changes
-- `./claude/sync.sh`: sync `CLAUDE.md` and `claude/` assets
-- `./claude/sync.sh --dry-run`: preview Claude sync changes
 - `git config core.hooksPath .githooks`: enable repo-managed Git hooks for Codex sync on push/pull
 - `./scripts/check-sensitive-data.sh`: scan tracked files for likely secrets before commit
 - `./scripts/check-sensitive-data.sh --warn-only`: report findings without failing
@@ -48,7 +45,7 @@ Recent history favors short conventional messages such as `chore(config): ...`, 
 Pull requests should include:
 
 - a short description of what changed and why
-- affected paths, such as `codex/`, `claude/`, or `scripts/`
+- affected paths, such as `codex/` or `scripts/`
 - notes on validation commands you ran
 - screenshots only when UI-facing docs or images changed
 

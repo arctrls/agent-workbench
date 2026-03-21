@@ -1,6 +1,6 @@
 # agent-workbench
 
-Personal AI agent configuration workspace for Codex and Claude.
+Personal AI agent configuration workspace for Codex.
 
 This repository is the source of truth for prompts, skills, sync scripts, and
 global agent defaults used in the local environment.
@@ -8,20 +8,17 @@ global agent defaults used in the local environment.
 ## What It Contains
 
 - `codex/`: Codex prompts, skills, base config, global `AGENTS.user.md`, and sync script
-- `claude/`: Claude commands, agents, docs, skills, presets, and sync script
 - `scripts/`: repository maintenance utilities such as secret checks
 - `.githooks/`: repo-managed Git hooks for automatic Codex sync on push and pull-related flows
 
 ## Sync Model
 
-This repository syncs configuration outward to local home directories.
+This repository syncs Codex configuration outward to local home directories.
 
 - `./codex/sync.sh`
   - updates `~/.codex/config.toml`
   - syncs `~/.codex/prompts` and `~/.codex/skills`
   - generates `~/AGENTS.md` from `codex/AGENTS.user.md`
-- `./claude/sync.sh`
-  - syncs `CLAUDE.md` and the `claude/` tree into `~/.claude`
 
 Generated targets should be edited here first, then synced to the home
 directory. Do not treat home-directory copies as the source of truth.
@@ -34,12 +31,6 @@ directory. Do not treat home-directory copies as the source of truth.
 
 # Apply Codex sync
 ./codex/sync.sh
-
-# Preview Claude sync
-./claude/sync.sh --dry-run
-
-# Apply Claude sync
-./claude/sync.sh
 
 # Enable repo-managed Git hooks
 git config core.hooksPath .githooks
