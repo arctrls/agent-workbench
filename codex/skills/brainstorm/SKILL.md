@@ -1,6 +1,6 @@
 ---
 name: brainstorm
-description: "Use when the user asks to brainstorm, design before coding, refine requirements, or turn an idea into an approved spec before implementation. This skill explores intent, compares approaches, presents a design, writes a spec to `docs/specs/`, and blocks code changes until the design is approved."
+description: "Use when the user asks to brainstorm, design before coding, refine requirements, or turn an idea into an approved spec before implementation. This skill explores intent, compares approaches, presents a design, writes a spec to `docs/specs/.local/`, and blocks code changes until the design is approved."
 ---
 
 # Brainstorm Ideas Into Specs
@@ -20,7 +20,7 @@ Complete these steps in order:
 3. Ask clarifying questions one at a time.
 4. Propose 2-3 approaches with trade-offs and a recommendation.
 5. Present the design in short sections and get approval.
-6. Write the approved spec to `docs/specs/YYYY-MM-DD-<topic>-design.md`.
+6. Write the approved spec to `docs/specs/.local/YYYY-MM-DD-<topic>-design.md`.
 7. Self-review the spec before handing it back to the user.
 8. Ask the user to review the written spec.
 9. If they want implementation next, switch to Plan Mode and write the implementation plan there.
@@ -54,10 +54,14 @@ Complete these steps in order:
 
 ### 5. Write the spec only after approval
 
-- Default location: repository root `docs/specs/`.
-- If the current directory is not inside a git repository, fall back to `./docs/specs/`.
+- Default location: repository root `docs/specs/.local/`.
+- If the current directory is not inside a git repository, fall back to `./docs/specs/.local/`.
 - Use the filename format `YYYY-MM-DD-<topic>-design.md`.
 - Create directories as needed.
+- Treat `docs/specs/.local/` as a local-only workspace and keep it ignored by
+  VCS.
+- If the spec later needs to be shared across machines or committed on purpose,
+  move or copy it into `docs/specs/`.
 - Do not commit automatically. If the user wants the spec committed, use the separate `commit` skill.
 
 ## Spec Template

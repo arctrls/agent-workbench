@@ -4,3 +4,4 @@ ignored/**
 claude/commands/sc
 .claude
 .omx
+docs/specs/.local/
