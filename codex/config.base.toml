@@ -24,20 +24,6 @@ type = "http"
 DD-API-KEY = "${DD_API_KEY}"
 DD-APPLICATION-KEY = "${DD_APP_KEY}"
 
-[mcp_servers.github]
-command = "docker"
-args = [
-  "run",
-  "-i",
-  "--rm",
-  "--env",
-  "GITHUB_PERSONAL_ACCESS_TOKEN",
-  "ghcr.io/github/github-mcp-server",
-]
-
-[mcp_servers.github.env]
-GITHUB_PERSONAL_ACCESS_TOKEN = "${GITHUB_PERSONAL_ACCESS_TOKEN}"
-
 [mcp_servers.mcp-installer]
 command = "npx"
 args = ["@anaisbetts/mcp-installer"]
