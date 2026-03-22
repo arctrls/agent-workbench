@@ -11,6 +11,10 @@ Turn rough ideas into an approved design and written spec before any implementat
 Do not write code, scaffold files, invoke implementation-oriented skills, or take any implementation action until you have presented a design and the user has approved it.
 </HARD-GATE>
 
+## Anti-Pattern: "This Is Too Small To Design"
+
+Do not skip the design step because the request looks small. A tiny utility, a one-file tweak, or a config change can still hide bad assumptions. The design can be short when the scope is small, but it still needs to be presented and approved before implementation.
+
 ## Workflow
 
 Complete these steps in order:
@@ -51,8 +55,16 @@ Complete these steps in order:
 - Scale the design to the task. Very small changes can use short sections; larger work should cover architecture, components, state/data flow, failure handling, and testing.
 - After each meaningful section, ask whether it still looks right before moving on.
 - If the user pushes back, revise the design before writing the spec.
+- Break the design into units with clear responsibilities, interfaces, and dependencies.
+- Prefer boundaries that keep each unit understandable and testable without reading unrelated internals.
 
-### 5. Write the spec only after approval
+### 5. Keep the design focused
+
+- Apply YAGNI. Remove speculative features, optional abstractions, and unrelated refactors unless they are required for the approved goal.
+- When existing code has structural problems that directly affect the work, include targeted improvements in the design.
+- Do not broaden scope with cleanup that does not materially help the current task.
+
+### 6. Write the spec only after approval
 
 - Default location: repository root `docs/specs/.local/`.
 - If the current directory is not inside a git repository, fall back to `./docs/specs/.local/`.
@@ -110,6 +122,7 @@ Before handing the spec to the user, verify that it:
 - reflects the latest approved direction
 - names the recommended approach and why it won
 - is consistent with the existing codebase and scope
+- uses clear component boundaries and responsibilities
 - covers failure handling and testing
 - avoids speculative features and unrelated refactors
 
@@ -121,7 +134,7 @@ After writing the spec, send a short handoff like:
 
 > Spec written to `<path>`. Please review it and tell me what to change, or tell me to switch to Plan Mode and I will turn it into an implementation plan.
 
-Wait for the user's response before doing implementation work.
+Wait for the user's response before doing implementation work. Do not skip directly from brainstorming into code changes. The next step after an approved spec is Plan Mode.
 
 ## Visual Topics
 
