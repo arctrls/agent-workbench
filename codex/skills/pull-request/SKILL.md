@@ -42,17 +42,108 @@ repository's dominant documentation language first.
 - Always use this format: `{{branch_name}} | {{title}}`
 - `branch_name` must be the current Git branch name exactly as-is
 - Do not rewrite, shorten, or interpret the branch prefix
-- Use the allowed prefixes only as validation, not as a writing input
 - `title` must be short, clear, and focused on intent
 - Prefer why the PR exists over a list of implementation details
 
 ## Body Rules
 
-- Write the body as concise bullet points only
-- Keep it short, usually 2-4 bullets
+- Structure the body with `##` section headings
+- Always write section headings in English, even when the body language is Korean
+- Under each section, use concise bullet points only
+- Do not write a flat bullet list without sections
+- Keep it short, usually 2-4 sections
+- Usually use 1-2 bullets per section
+- Select only the sections that materially help the reviewer understand the change
+- If the change is small, omit empty, redundant, or low-value sections
 - Emphasize intent, motivation, expected effect, or risk reduction
 - Do not turn the body into a file list, diff summary, or commit log
 - Keep implementation details secondary unless they are necessary for context
+
+## Korean Style Rules
+
+- When writing bullet content in Korean, do not use honorific or polite endings
+- Use terse, review-friendly Korean prose
+- Prefer short endings such as `추가함`, `수정함`, `정리함`, `줄였음`, `없음`
+- Avoid endings such as `했습니다`, `입니다`, `부탁드립니다`, `해주세요`
+- Keep each bullet to one line when possible
+
+## Type-Specific Body Templates
+
+Choose the PR body structure from the current branch prefix only.
+
+### `feature/`
+
+Preferred sections:
+
+- `## Background`
+- `## What Added`
+- `## Expected Impact`
+- `## Notes`
+
+Guidance:
+
+- Focus on why the feature is needed
+- Explain what capability, behavior, or flow was added
+- Highlight the expected user-facing or system-level impact
+- Use `## Notes` only when there is a meaningful constraint, rollout note, or follow-up item
+
+For small feature changes, usually keep:
+
+- `## Background`
+- `## What Added`
+- optionally `## Expected Impact`
+
+### `bugfix/`
+
+Preferred sections:
+
+- `## Problem`
+- `## Root Cause`
+- `## Fix`
+- `## Validation`
+
+Guidance:
+
+- Start from the broken or incorrect behavior
+- Explain the root cause when it is clear from the diff or context
+- Describe the fix in terms of behavior correction and risk reduction
+- Use `## Validation` when verification materially improves reviewer confidence
+
+For small bug fixes, usually keep:
+
+- `## Problem`
+- `## Fix`
+- optionally `## Validation`
+
+### `refactor/`
+
+Preferred sections:
+
+- `## Motivation`
+- `## Scope`
+- `## Behavioral Safety`
+- `## Expected Benefit`
+
+Guidance:
+
+- Explain why the refactor was worth doing
+- Describe what was reorganized, simplified, or clarified
+- Explicitly state behavioral stability when appropriate
+- Focus on maintainability, clarity, or testability gains
+
+For small refactors, usually keep:
+
+- `## Motivation`
+- `## Scope`
+- optionally `## Behavioral Safety`
+
+## Body Selection Rules
+
+- Infer the PR type from the branch prefix only
+- Do not reclassify the PR type from the diff
+- Do not mix templates across multiple types unless the user explicitly asks
+- If a section would be empty or redundant, omit it
+- Prefer clarity over template completeness
 
 ## Language Rules
 
