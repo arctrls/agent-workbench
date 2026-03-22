@@ -25,6 +25,7 @@ Use Markdown for prompts and guides, TOML for Codex config, and Bash for repo au
 
 - Prefer concise, task-focused Markdown with stable headings
 - Name skills as lowercase hyphenated directories with `SKILL.md` inside, for example `codex/skills/commit/SKILL.md`
+- Keep every skill name limited to lowercase letters, numbers, and hyphens only; set the `SKILL.md` frontmatter `name` to match the parent directory name exactly, and do not use namespace-style separators such as `:`
 - Keep shell scripts POSIX-friendly where practical and start with `set -euo pipefail`
 - Preserve existing directory conventions instead of inventing new top-level folders
 
