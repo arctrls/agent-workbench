@@ -89,6 +89,8 @@ The name should expose the narrow use case, not a generic action.
 - Does the new `WHERE` contain only row-identifying keys?
 - Were preserved-value rebindings removed from the narrow path?
 - Was timestamp handling preserved or improved?
+- Did the new SQL query keep a comment that names the original C# file and line range, not just the query id?
+- Did the Java action swap keep a comment that points back to the original C# file and line range?
 - Did the diff stay limited to one new query, one actionId swap, and minimum required cleanup?
 
 ## Common Mistakes
@@ -99,6 +101,22 @@ The name should expose the narrow use case, not a generic action.
 - Omitting change-time updates
 - Replacing more than the single requested actionId
 - Proceeding despite weak save-path coverage
+- Deleting C# BO migration comments during the refactor so the origin of the split is lost
+- Rewriting a source comment and accidentally dropping the original C# line numbers
+- Replacing an existing migration comment instead of adding a separate origin-preservation comment below it
+
+## Comment Preservation
+
+When splitting one narrow path away from a shared legacy merge, preserve the migration trail in both places:
+
+- SQL XML example:
+  `<!-- C# BO 원본: ActionManager.cs:4124-4126 m_delivery_merge (공유 upsert에서 분리) -->`
+- Java call site example:
+  `// C# BO 원본: ActionManager.cs:4124-4126 m_delivery_merge → m_delivery_partial_cancel_update로 분리`
+
+If an existing migration comment is already present, keep it unchanged and add the new source comment as an additional line. Do not rewrite the existing comment to "improve" it.
+
+Carry this origin forward in the final report as part of the refactor result, including the original file and line range.
 
 ## Project Example
 

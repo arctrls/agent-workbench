@@ -79,6 +79,14 @@ Read [references/pattern.md](references/pattern.md) before editing anything.
 - If timestamp semantics or change-time columns are unclear, stop and ask.
 - Do not satisfy the coverage gate by silently proceeding on weak tests. Stop and ask first.
 - Do not rewrite the shared `merge` query to fit the new path.
+- Add a source-preservation comment at the new SQL XML query that includes the original C# file and line range, not only the queryId. Example:
+  `<!-- C# BO 원본: ActionManager.cs:4124-4126 m_delivery_merge (공유 upsert에서 분리) -->`
+- Add a source-preservation comment at the Java call site where the new actionId is introduced, and keep the original file and line range. Example:
+  `// C# BO 원본: ActionManager.cs:4124-4126 m_delivery_merge → m_delivery_partial_cancel_update로 분리`
+- If an existing comment already has the original C# file and line range, keep that existing comment unchanged and add the new source-preservation comment on a separate line.
+- Treat source comments as append-only for this workflow. Do not rewrite, replace, or compress an existing migration comment just to add the new origin note.
+- Do not downgrade source comments from file+line references to only queryId or use-case prose.
+- Do not delete existing C# BO migration comments that explain the original source path unless the user explicitly asks for comment cleanup.
 
 ## Stop Conditions
 
@@ -99,4 +107,5 @@ In the final response, include:
 - `WHERE` keys used
 - how timestamp handling changed
 - what tests were used to justify the refactor
+- the C# BO source path carried forward in code comments, including original file and line range
 - any remaining risks or explicit user-approved exceptions
