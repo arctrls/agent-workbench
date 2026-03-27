@@ -28,6 +28,9 @@ fi
 output_dir="$HOME/Downloads"
 mkdir -p "$output_dir"
 
+input_dir=$(cd "$(dirname "$input_file")" && pwd)
+base_href=$(python3 -c 'from pathlib import Path; import sys; print(Path(sys.argv[1]).resolve().as_uri())' "$input_dir")
+
 input_name=$(basename "$input_file")
 base_name="${input_name%.*}"
 if [[ -z "$base_name" || "$base_name" == "$input_name" ]]; then
@@ -40,9 +43,10 @@ if [[ -f "$output_pdf" ]]; then
   output_pdf="$output_dir/${base_name}_${timestamp}.pdf"
 fi
 
-temp_html=$(mktemp /tmp/md-to-pdf.XXXXXX.html)
+temp_dir=$(mktemp -d /tmp/md-to-pdf.XXXXXX)
+temp_html="$temp_dir/document.html"
 cleanup() {
-  rm -f "$temp_html"
+  rm -rf "$temp_dir"
 }
 trap cleanup EXIT
 
@@ -51,10 +55,11 @@ cat >"$temp_html" <<'HTMLHEAD'
 <html>
 <head>
 <meta charset="UTF-8">
+<base href="BASE_HREF_PLACEHOLDER/">
 <style>
 @page { size: A4; margin: 20mm 15mm; }
 body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    font-family: "Apple SD Gothic Neo", "AppleGothic", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
     font-size: 14px;
     line-height: 1.6;
     max-width: 900px;
@@ -91,13 +96,26 @@ table th { background-color: #f6f8fa; font-weight: 600; }
 table tr:nth-child(even) { background-color: #f6f8fa; }
 ul, ol { padding-left: 2em; margin-top: 0; margin-bottom: 16px; }
 li + li { margin-top: 0.25em; }
+img { max-width: 100%; height: auto; }
 hr { height: 0.25em; padding: 0; margin: 24px 0; background-color: #d0d7de; border: 0; }
 </style>
 </head>
 <body>
 HTMLHEAD
 
-pandoc "$input_file" -f markdown -t html >>"$temp_html"
+python3 - "$temp_html" "$base_href" <<'PY'
+from pathlib import Path
+import sys
+
+html_path = Path(sys.argv[1])
+base_href = sys.argv[2]
+html_path.write_text(
+    html_path.read_text(encoding="utf-8").replace("BASE_HREF_PLACEHOLDER", base_href),
+    encoding="utf-8",
+)
+PY
+
+pandoc "$input_file" -f markdown+wikilinks_title_after_pipe -t html >>"$temp_html"
 printf '%s\n' '</body></html>' >>"$temp_html"
 
 weasyprint "$temp_html" "$output_pdf"

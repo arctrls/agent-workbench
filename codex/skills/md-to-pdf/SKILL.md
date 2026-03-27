@@ -22,6 +22,7 @@ Keep the workflow deterministic by using the bundled shell script instead of rew
 - Write the PDF to `~/Downloads/<input-basename>.pdf`.
 - If that file already exists, append a timestamp suffix before `.pdf`.
 - Use embedded CSS for a clean document-style layout.
+- Resolve standard Markdown image paths and Obsidian `![[image.png]]` embeds relative to the source note.
 - Keep the operation single-file and local. Do not upload content anywhere.
 
 ## Prerequisites
