@@ -24,6 +24,18 @@ type = "http"
 DD-API-KEY = "${DD_API_KEY}"
 DD-APPLICATION-KEY = "${DD_APP_KEY}"
 
+[mcp_servers.databricks-sql]
+command = "uvx"
+args = [
+  "uc-mcp-proxy",
+  "--url",
+  "https://dbc-d830a2e1-ec32.cloud.databricks.com/api/2.0/mcp/sql",
+  "--auth-type",
+  "databricks-cli",
+  "--profile",
+  "default",
+]
+
 [mcp_servers.mcp-installer]
 command = "npx"
 args = ["@anaisbetts/mcp-installer"]
