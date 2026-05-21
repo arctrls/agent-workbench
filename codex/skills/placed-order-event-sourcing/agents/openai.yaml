@@ -1,0 +1,4 @@
+interface:
+  display_name: "PlacedOrder Event Sourcing"
+  short_description: "Guide Pacman PlacedOrder event sourcing work"
+  default_prompt: "Use $placed-order-event-sourcing to guide a Pacman PlacedOrder event sourcing change."
