@@ -1,0 +1,4 @@
+interface:
+  display_name: "Vopen"
+  short_description: "Open files in the active Vim or Neovim session"
+  default_prompt: "Use $vopen to open a local file in my active Vim or Neovim session."
