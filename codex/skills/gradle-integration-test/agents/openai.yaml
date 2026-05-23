@@ -1,0 +1,7 @@
+interface:
+  display_name: "Gradle Integration Test"
+  short_description: "Run Gradle integration tests quietly"
+  default_prompt: "Use $gradle-integration-test to run Gradle integrationTest with quiet ApprovalTests and analyze any failures."
+
+policy:
+  allow_implicit_invocation: false
