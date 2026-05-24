@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-source_branch="${1:-$(git branch --show-current)}"
+original_branch="$(git branch --show-current)"
+source_branch="${1:-$original_branch}"
 
 if [[ -z "$source_branch" ]]; then
   echo "Error: could not determine source branch" >&2
@@ -20,7 +21,7 @@ fi
 
 git fetch origin dev
 git switch dev
-git merge --ff-only origin/dev
+git reset --hard origin/dev
 
 if ! git merge --no-ff "$source_branch"; then
   echo "Merge conflict detected." >&2
@@ -31,3 +32,7 @@ if ! git merge --no-ff "$source_branch"; then
 fi
 
 git push origin dev
+
+if [[ -n "$original_branch" && "$original_branch" != "dev" ]]; then
+  git switch "$original_branch"
+fi

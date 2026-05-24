@@ -1,4 +1,4 @@
 interface:
   display_name: "dev-deploy"
-  short_description: "Merge current branch into latest dev and push safely"
-  default_prompt: "Use $dev-deploy to update dev from the current branch with safe conflict handling."
+  short_description: "Reset dev to origin, merge current branch, push, and return"
+  default_prompt: "Use $dev-deploy to reset dev to origin/dev, merge the current branch, push, and return to the original branch."
