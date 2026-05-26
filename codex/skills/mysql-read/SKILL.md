@@ -1,6 +1,6 @@
 ---
 name: mysql-read
-description: Run read-only MySQL queries against the Thomas local Docker MySQL or the dev Aurora hmmall/thomas databases. Use when the user wants quick schema inspection, SQL lookups, NATION/STATE mapping checks, or direct read-only validation without relying on MCP.
+description: Run read-only MySQL queries against a project-local Docker MySQL or the dev Aurora database. Use when the user wants quick schema inspection, SQL lookups, NATION/STATE mapping checks, or direct read-only validation without relying on MCP.
 ---
 
 # MySQL Read
@@ -9,7 +9,7 @@ Use the bundled shell script for read-only MySQL access. Always choose the
 database target deliberately before running a query.
 
 Default targets:
-- `local`: the developer's local Thomas Docker MySQL, reached through the local `mysql` client
+- `local`: the current project's local Docker MySQL, reached through the local `mysql` client
 - `dev`: the shared DEV Aurora read endpoint, reached through the local `mysql` client after loading credentials from AWS Secrets Manager
 
 ## Workflow
@@ -25,6 +25,20 @@ Default targets:
 4. Summarize the result briefly and include the important rows or counts in the reply.
 5. Mention which target was queried (`local` or `dev`) in the reply when the distinction matters.
 
+## Local Target Resolution
+
+For `local`, do not assume a Thomas-specific container name, database, user, or
+password. Projects differ.
+
+Resolution order:
+1. Use explicit flags or env vars, such as `--host`, `--port`, `--user`, `--password`, `--database`, or `MYSQL_READ_LOCAL_*`.
+2. Inspect the current Spring Boot project's local datasource config under the working directory, especially `application-local.properties`, `application-local.yml`, or `application-local.yaml`.
+3. If no Spring Boot local datasource is found, inspect running Docker containers for a MySQL/MariaDB container with host port `3306/tcp` published.
+4. Fall back to `127.0.0.1:3306` with `user/pass` only as a last resort.
+
+Use `--project-dir <path>` or `MYSQL_READ_PROJECT_DIR` when running the script
+from outside the Spring Boot project.
+
 ## Commands
 
 ```bash
@@ -38,11 +52,10 @@ Default targets:
 ## Behavior
 
 - Only `SELECT`, `SHOW`, `DESCRIBE`, `DESC`, `EXPLAIN`, and `WITH ... SELECT` queries are allowed.
-- `local` uses a running Docker MySQL container and defaults to:
-  - host `127.0.0.1`
-  - port `3306`
-  - user `user`
-  - password `pass`
+- `local` resolves connection details from the current project before falling back to Docker port discovery:
+  - Spring Boot local datasource URL, username, password
+  - running Docker MySQL/MariaDB host port mapping
+  - final fallback `127.0.0.1:3306`, user `user`, password `pass`
 - `dev` defaults to:
   - AWS profile `default`
   - region `ap-northeast-2`
@@ -66,5 +79,5 @@ Default targets:
 - `mysql`
 - `aws`
 
-If `local` is used, the Thomas MySQL container must be reachable from the host, normally at `127.0.0.1:3306`.
+If `local` is used, run the command from the Spring Boot project directory, or pass `--project-dir`.
 If `dev` is used, run `aws sso login` first.
