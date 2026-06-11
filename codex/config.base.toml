@@ -16,14 +16,6 @@ args = ["-y", "@upstash/context7-mcp"]
 [mcp_servers.context7.env]
 DEFAULT_MINIMUM_TOKENS = "6000"
 
-[mcp_servers.datadog-mcp]
-url = "https://mcp.datadoghq.com/api/unstable/mcp-server/mcp"
-type = "http"
-
-[mcp_servers.datadog-mcp.http_headers]
-DD-API-KEY = "${DD_API_KEY}"
-DD-APPLICATION-KEY = "${DD_APP_KEY}"
-
 [mcp_servers.mcp-installer]
 command = "npx"
 args = ["@anaisbetts/mcp-installer"]
@@ -56,3 +48,12 @@ args = ["-y", "@notionhq/notion-mcp-server"]
 [mcp_servers.playwright]
 command = "npx"
 args = ["@playwright/mcp@latest"]
+
+[plugins."github@openai-curated"]
+enabled = true
+
+[plugins."superpowers@openai-curated"]
+enabled = true
+
+[plugins."datadog@openai-curated"]
+enabled = true
