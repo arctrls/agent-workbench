@@ -44,6 +44,7 @@ FASTMCP_LOG_LEVEL = "ERROR"
 [mcp_servers.notion]
 command = "npx"
 args = ["-y", "@notionhq/notion-mcp-server"]
+env_vars = ["NOTION_TOKEN"]
 
 [mcp_servers.playwright]
 command = "npx"
