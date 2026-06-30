@@ -1,0 +1,4 @@
+interface:
+  display_name: "Java Code Style Review"
+  short_description: "Review Java code against local style rules"
+  default_prompt: "Use $java-code-style-review to review the changed Java files against the local Java code style rules and report actionable findings."
