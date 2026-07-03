@@ -1,4 +1,0 @@
-interface:
-  display_name: "html-publish"
-  short_description: "Create, verify, and publish static HTML"
-  default_prompt: "Use $html-publish to create a static HTML page, verify it locally, commit it on a feature branch, and publish it as a PR."
