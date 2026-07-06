@@ -1,0 +1,4 @@
+interface:
+  display_name: "Hunk Review"
+  short_description: "Control live Hunk review sessions from Codex."
+  default_prompt: "Use Hunk to inspect the current live review session, navigate relevant hunks, and add concise inline comments when useful."
