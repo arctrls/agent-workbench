@@ -32,6 +32,9 @@ directory. Do not treat home-directory copies as the source of truth.
 # Apply Codex sync
 ./codex/sync.sh
 
+# Refresh Datadog pup skills in the repo source
+pup skills install codex --dir codex/skills -y
+
 # Enable repo-managed Git hooks
 git config core.hooksPath .githooks
 
