@@ -50,20 +50,66 @@ Projection checks should usually include:
 - `SELL_DELIY_ADDR_GOODS`
 - `SELL_DELIY_ADDR_ADD`
 
+## Parallel Investigation
+
+Use parallel `explorer` subagents when the task spans at least two of these
+surfaces: the original path, the event-sourced path, or characterization-test
+coverage. Keep small, isolated lookups in the main agent.
+
+Spawn these three read-only investigations with the target use case and known
+entry point in every brief:
+
+1. **Original-path explorer**
+   - Trace the feature-flag-off path from its entry point through `ActionSet`
+     actions and external side effects.
+   - Identify which fingerprint-covered rows change and which stock, ledger,
+     sequence, or redistribution effects actually occur.
+2. **Event-path explorer**
+   - Trace the feature-flag-on path through the application service, event,
+     applier, and projection writer.
+   - Identify event payload values, domain calculations, external inputs, and
+     every projection row written.
+3. **Coverage explorer**
+   - Find characterization and integration tests, fixtures, feature-flag
+     coverage, and assertions for the affected projection rows and side effects.
+   - Report missing coverage without creating or editing tests.
+
+Require every explorer to return:
+
+- relevant file paths and symbols
+- the traced flow in execution order
+- observed behavior separated from assumptions
+- unresolved questions or contradictory evidence
+
+Explorers must not edit files, choose the domain design, or recommend unrelated
+cleanup. Wait for all requested investigations, reconcile disagreements against
+the source, and verify material delegated claims before editing.
+
+The main agent owns the combined change map and all domain decisions. Use
+exactly one writer—the main agent or one implementation worker—for source and
+test changes. Never let parallel agents edit the same worktree.
+
 ## Workflow
 
-1. Find the original path, event-sourced path, event, applier, projection writer,
-   and feature flag.
-2. List fingerprint-covered order rows and non-order external side effects.
-3. Check whether each side effect exists in the original path before requiring it
+1. Run the parallel investigation when the task meets its delegation threshold;
+   otherwise inspect the relevant path directly.
+2. Reconcile the original path, event-sourced path, and coverage findings into
+   one evidence-backed change map.
+3. List fingerprint-covered order rows and non-order external side effects.
+4. Check whether each side effect exists in the original path before requiring it
    in the new path.
-4. Add or extend characterization tests for feature-flag-on behavior.
-5. Gather external inputs in the application service.
-6. Move pure calculations into `postorder/placedorder` domain code.
-7. Build event payloads as changes.
-8. Apply events with pure appliers.
-9. Write fingerprint-covered projection rows through the projection writer.
-10. Execute external side effects from the application service.
+5. Add or extend characterization tests for feature-flag-on behavior.
+6. Gather external inputs in the application service.
+7. Move pure calculations into `postorder/placedorder` domain code.
+8. Build event payloads as changes.
+9. Apply events with pure appliers.
+10. Write fingerprint-covered projection rows through the projection writer.
+11. Execute external side effects from the application service.
+12. When the diff is substantial, ask two read-only `explorer` subagents to
+    review it independently: one checks domain-boundary invariants and the
+    other checks projection/test coverage.
+13. Review their evidence, fix confirmed findings with the single writer, and run
+    the required verification commands in the main agent.
 
 ## Review Checklist
 
