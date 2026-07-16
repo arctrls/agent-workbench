@@ -1,6 +1,6 @@
 ---
 name: pull-request
-description: "Draft an intent-focused pull request, confirm it with the user, push the current branch when needed, and create a GitHub PR against `main`. The skill instructions are written in English and should explicitly account for Korean-user collaboration context."
+description: "Draft an intent-focused pull request, confirm it with the user, push the current branch when needed, create a GitHub PR against `main`, and self-assign the authenticated GitHub user when possible. The skill instructions are written in English and should explicitly account for Korean-user collaboration context."
 ---
 
 # GitHub Pull Request Automation
@@ -34,8 +34,14 @@ repository's dominant documentation language first.
     - if the branch has no upstream on `origin`, run `git push -u origin HEAD`
     - if the branch already exists on `origin` but local HEAD is ahead, run
       `git push`
-15. Run `gh pr create --base main --title ... --body ...`.
-16. Return the PR URL and the exact title and body that were used.
+15. Run `gh pr create --base main --title ... --body ...` and capture the PR
+    URL.
+16. Attempt to self-assign the authenticated GitHub user by running
+    `gh pr edit <PR URL> --add-assignee "@me"`.
+    - Treat self-assignment as best effort.
+    - If it fails, keep the successfully created PR and report the failure.
+17. Return the PR URL, the exact title and body that were used, and whether
+    self-assignment succeeded.
 
 ## Title Rules
 
@@ -164,9 +170,17 @@ For small refactors, usually keep:
 - The branch has meaningful changes relative to `origin/main`
 - The user has approved the final draft
 
+## Assignee Rules
+
+- Assign the authenticated GitHub user with `@me` after PR creation
+- Do not let an assignee permission or eligibility failure invalidate PR creation
+- Do not assign any other user unless the user explicitly requests it
+- Report the self-assignment outcome in the final response
+
 ## Notes
 
 - Base branch is always `main`
 - Never create the PR before showing the draft to the user
 - Stop immediately when a required check fails
 - When reporting a failure, be specific about the blocking condition
+- A self-assignment failure is non-blocking after the PR has been created
