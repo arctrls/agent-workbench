@@ -1,6 +1,6 @@
 # User Global AGENTS Rules
 
-This file is the repository-managed source for the home-level `~/AGENTS.md`.
+This file is the repository-managed source for the global `~/.codex/AGENTS.md`.
 These are home-level default instructions. Follow more specific repository or
 subdirectory `AGENTS.md` files when they provide narrower guidance.
 

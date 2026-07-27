@@ -18,7 +18,7 @@ This repository syncs Codex configuration outward to local home directories.
 - `./codex/sync.sh`
   - updates `~/.codex/config.toml`
   - syncs `~/.codex/prompts` and `~/.codex/skills`
-  - generates `~/AGENTS.md` from `codex/AGENTS.user.md`
+  - generates `~/.codex/AGENTS.md` from `codex/AGENTS.user.md`
 
 Generated targets should be edited here first, then synced to the home
 directory. Do not treat home-directory copies as the source of truth.
@@ -47,8 +47,7 @@ When `core.hooksPath` is set to `.githooks`, Codex sync runs automatically on:
 - `post-merge`
 - `post-rewrite` for rebase flows
 
-This keeps `~/.codex` and `~/AGENTS.md` aligned with the repository after
-common Git operations.
+This keeps `~/.codex` aligned with the repository after common Git operations.
 
 ## Working Principles
 

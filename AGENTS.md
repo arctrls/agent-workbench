@@ -7,13 +7,13 @@ This repository is the source of truth for personal Codex tooling configuration.
 - `codex/`: Codex prompts, skills, `config.base.toml`, `AGENTS.user.md`, and `sync.sh`
 - `scripts/`: repository maintenance utilities such as secret checks
 
-Do not edit generated files in `~/.codex` or `~/AGENTS.md` directly.
+Do not edit generated files in `~/.codex` directly.
 
 ## Build, Test, and Development Commands
 
 This repo has no app build pipeline. The main workflow is validation plus sync:
 
-- `./codex/sync.sh`: sync `codex/` into home config and generate `~/AGENTS.md`
+- `./codex/sync.sh`: sync `codex/` into home config and generate `~/.codex/AGENTS.md`
 - `./codex/sync.sh --dry-run`: preview Codex sync changes
 - `git config core.hooksPath .githooks`: enable repo-managed Git hooks for Codex sync on push/pull
 - `./scripts/check-sensitive-data.sh`: scan tracked files for likely secrets before commit

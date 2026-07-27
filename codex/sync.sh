@@ -7,7 +7,7 @@ CODEX_HOME="$HOME/.codex"
 BASE_CONFIG="$CODEX_SOURCE/config.base.toml"
 TARGET_CONFIG="$CODEX_HOME/config.toml"
 HOME_AGENTS_SOURCE="$CODEX_SOURCE/AGENTS.user.md"
-HOME_AGENTS_TARGET="$HOME/AGENTS.md"
+HOME_AGENTS_TARGET="$CODEX_HOME/AGENTS.md"
 
 DRY_RUN=0
 
@@ -23,7 +23,7 @@ Options:
 This script manages:
   - codex/config.base.toml -> ~/.codex/config.toml (managed keys only)
   - ~/.codex/prompts, ~/.codex/skills
-  - codex/AGENTS.user.md -> ~/AGENTS.md
+  - codex/AGENTS.user.md -> ~/.codex/AGENTS.md
 
 For Codex config:
   - keys/tables present in codex/config.base.toml overwrite home config
