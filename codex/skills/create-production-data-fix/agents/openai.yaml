@@ -1,0 +1,7 @@
+interface:
+  display_name: "Create Production Data Fix"
+  short_description: "Create safe per-row MySQL production correction files"
+  default_prompt: "Use $create-production-data-fix to inspect replicated production data and create a safe MySQL correction SQL file without executing it."
+
+policy:
+  allow_implicit_invocation: false
