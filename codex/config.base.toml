@@ -28,6 +28,8 @@ args = ["@anaisbetts/mcp-installer"]
 [mcp_servers.mysql-mcp-server]
 command = "uvx"
 args = [
+  "--with",
+  "mcp<2",
   "awslabs.mysql-mcp-server==1.0.20",
   "--hostname",
   "dev-20251223-cluster.cluster-ro-cn1xjryhj9xq.ap-northeast-2.rds.amazonaws.com",
