@@ -1,0 +1,4 @@
+interface:
+  display_name: "CSV to XLSX"
+  short_description: "Convert CSV files to polished, Excel-safe workbooks"
+  default_prompt: "Use $csv-to-xlsx to convert this CSV into a polished, Excel-compatible workbook."
