@@ -19,7 +19,7 @@ import tempfile
 import tomllib
 
 
-MANAGED_SECTIONS = {"features", "mcp_servers"}
+MANAGED_SECTIONS = {"features", "mcp_servers", "tui"}
 BARE_KEY = re.compile(r"^[A-Za-z0-9_-]+$")
 
 
@@ -154,7 +154,7 @@ def plan_config(source: Path, target: Path) -> ConfigPlan:
     if unexpected:
         raise ValueError("App-owned config keys are not sync targets: " + ", ".join(sorted(unexpected)))
     if any(not isinstance(value, dict) for value in managed.values()):
-        raise ValueError("Managed features and mcp_servers must be TOML tables")
+        raise ValueError("Managed features, mcp_servers, and tui must be TOML tables")
     original = read_existing(target)
     current = tomllib.loads(original.decode("utf-8")) if original is not None else {}
     merged, changes = merge_managed(current, managed)

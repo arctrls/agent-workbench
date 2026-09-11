@@ -4,6 +4,9 @@
 [features]
 multi_agent = true
 
+[tui]
+animations = false
+
 [mcp_servers.atlassian]
 url = "https://mcp.atlassian.com/v1/mcp/authv2"
 

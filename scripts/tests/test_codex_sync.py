@@ -121,9 +121,10 @@ class CodexSyncTests(unittest.TestCase):
     def assert_success(self, result):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
-    def test_repository_base_only_manages_mcp_and_features(self):
+    def test_repository_base_only_manages_repository_owned_sections(self):
         base = tomllib.loads((REPO / "codex/config.base.toml").read_text())
-        self.assertEqual(set(base), {"features", "mcp_servers"})
+        self.assertEqual(set(base), {"features", "mcp_servers", "tui"})
+        self.assertFalse(base["tui"]["animations"])
 
     def test_managed_keys_update_without_removing_app_settings(self):
         before = tomllib.loads(LOCAL)
@@ -140,6 +141,16 @@ class CodexSyncTests(unittest.TestCase):
         self.assertFalse(server["enabled"])
         self.assertEqual(server["env"], {"FIXED": "new", "LOCAL_ONLY": "private-value-do-not-print"})
         self.assertEqual((self.target / "config.toml").stat().st_mode & 0o777, 0o600)
+
+    def test_tui_animations_are_managed_without_removing_local_tui_settings(self):
+        self.write_source("config.base.toml", BASE + "\n[tui]\nanimations = false\n")
+        self.write_target("config.toml", LOCAL + "\n[tui]\nanimations = true\ntheme = \"current-theme\"\n")
+
+        self.assert_success(self.run_sync())
+
+        after = tomllib.loads((self.target / "config.toml").read_text())
+        self.assertFalse(after["tui"]["animations"])
+        self.assertEqual(after["tui"]["theme"], "current-theme")
 
     def test_only_owned_skill_contents_are_deleted(self):
         protected = [

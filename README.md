@@ -17,7 +17,7 @@ This repository syncs only repository-owned configuration outward to local home
 directories. It requires Python 3.11+ and `rsync`; no Python packages are needed.
 
 - `./codex/sync.sh`
-  - recursively merges only `[features]` and `[mcp_servers]` keys from
+  - recursively merges only `[features]`, `[tui]`, and `[mcp_servers]` keys from
     `codex/config.base.toml` into `~/.codex/config.toml`
   - preserves model/reasoning preferences, plugin state, and all other local keys
   - updates prompts without deleting local-only prompt files
