@@ -1,0 +1,4 @@
+interface:
+  display_name: "Copy Teams Table"
+  short_description: "Copy a real table into Microsoft Teams"
+  default_prompt: "Use $copy-teams-table to copy this table to my clipboard as a Microsoft Teams table."
