@@ -52,3 +52,13 @@ env_vars = ["NOTION_TOKEN"]
 [mcp_servers.playwright]
 command = "npx"
 args = ["@playwright/mcp@latest"]
+
+[mcp_servers.rea]
+command = "/opt/homebrew/opt/node/bin/npx"
+args = ["-y", "rea-agents@6.8.0", "mcp"]
+startup_timeout_sec = 30
+tool_timeout_sec = 450
+
+[mcp_servers.rea.env]
+# Use the supported Homebrew Node runtime instead of the shell's older fnm default.
+PATH = "/opt/homebrew/opt/node/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
