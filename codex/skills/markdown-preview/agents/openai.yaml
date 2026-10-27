@@ -1,0 +1,4 @@
+interface:
+  display_name: "markdown-preview"
+  short_description: "Preview Markdown and Mermaid in your browser"
+  default_prompt: "Use $markdown-preview to open the Markdown file we just worked on in my browser."

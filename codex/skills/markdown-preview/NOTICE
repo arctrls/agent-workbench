@@ -1,0 +1,17 @@
+markdown-preview
+
+Adapted from rp1-run/rp1, plugins/base/skills/markdown-preview.
+Source: https://github.com/rp1-run/rp1/tree/e80e8e01109ad5f351ae09ed979512f1410d1a8d/plugins/base/skills/markdown-preview
+Retrieved: 2026-10-14
+Copyright 2025 Prem Pillai
+Upstream license: Apache License 2.0 (see LICENSE).
+
+Local modifications:
+- Replaced Claude/rp1-specific instructions and shared build directives with
+  a standalone Codex workflow and invocation metadata.
+- Added a Python launcher and tests; removed outdated upstream usage examples.
+- Retained the three upstream HTML themes, with JSON source encoding,
+  DOMPurify sanitization, pinned CDN versions, normal Markdown soft breaks,
+  source-relative asset/link resolution, and text-only error output.
+- Removed claims that CDN-backed HTML is self-contained or that a Content
+  Security Policy alone prevents script injection.
