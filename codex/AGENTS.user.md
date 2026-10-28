@@ -50,3 +50,9 @@ subdirectory `AGENTS.md` files when they provide narrower guidance.
 - **SUB-AGENTS**: Use sub-agents only when delegation or parallel work materially improves speed, clarity, or risk reduction.
 - **AVOID OVER-DELEGATION**: Do not delegate trivial tasks or urgent critical-path work that is faster to do directly.
 - **VERIFY DELEGATED WORK**: Never trust important delegated claims blindly. Review and verify important delegated results yourself.
+
+## Pull Requests
+
+- **REQUIRED SKILL**: Before drafting or creating a GitHub PR, read and follow the `pull-request` skill. This includes requests such as `PR 올려줘`, `PR 생성`, and `풀 리퀘스트 작성`, regardless of whether the PR is created through a CLI, API, or another tool.
+- **SKILL LOOKUP**: Use the path in the available skill list. If `pull-request` is absent, read `$CODEX_HOME/skills/pull-request/SKILL.md` directly, using `~/.codex/skills/pull-request/SKILL.md` when `CODEX_HOME` is unset.
+- **MISSING SKILL**: If the skill cannot be read, report the missing or unreadable path and do not create the PR.

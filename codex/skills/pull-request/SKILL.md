@@ -1,6 +1,6 @@
 ---
 name: pull-request
-description: "Draft an intent-focused pull request, confirm it with the user, push the current branch when needed, create a GitHub PR against `main`, and self-assign the authenticated GitHub user when possible. The skill instructions are written in English and should explicitly account for Korean-user collaboration context."
+description: "Use when the user asks to draft or create a GitHub pull request, including 'PR 올려줘', 'PR 생성', '풀 리퀘스트 작성', or 'open a PR'. Draft an intent-focused PR against main, confirm it with the user, push when needed, and self-assign when possible."
 ---
 
 # GitHub Pull Request Automation
