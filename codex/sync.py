@@ -20,6 +20,8 @@ import tomllib
 
 
 MANAGED_SECTIONS = {"features", "mcp_servers", "tui"}
+# Explicit removals of retired repository-owned servers; keep other local servers.
+RETIRED_MCP_SERVERS = {"playwright"}
 BARE_KEY = re.compile(r"^[A-Za-z0-9_-]+$")
 
 
@@ -158,6 +160,13 @@ def plan_config(source: Path, target: Path) -> ConfigPlan:
     original = read_existing(target)
     current = tomllib.loads(original.decode("utf-8")) if original is not None else {}
     merged, changes = merge_managed(current, managed)
+    servers = merged.get("mcp_servers", {})
+    retired = servers.keys() & RETIRED_MCP_SERVERS
+    if retired:
+        merged["mcp_servers"] = {
+            name: settings for name, settings in servers.items() if name not in retired
+        }
+        changes.extend(f"remove mcp_servers.{name}" for name in sorted(retired))
     output = render_toml(merged) if changes or original is None else None
     return ConfigPlan(target, original, output, tuple(changes))
 

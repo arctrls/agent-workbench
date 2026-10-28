@@ -152,6 +152,39 @@ class CodexSyncTests(unittest.TestCase):
         self.assertFalse(after["tui"]["animations"])
         self.assertEqual(after["tui"]["theme"], "current-theme")
 
+    def test_retired_playwright_server_is_removed_without_changing_browser_plugins(self):
+        self.write_target("config.toml", LOCAL + '''
+[mcp_servers.playwright]
+command = "npx"
+args = ["@playwright/mcp@latest"]
+
+[plugins."chrome@openai-bundled"]
+enabled = true
+
+[plugins."browser@openai-bundled"]
+enabled = true
+''')
+        before = tomllib.loads((self.target / "config.toml").read_text())
+        original_files = snapshot(self.target)
+
+        preview = self.run_sync("--dry-run")
+        self.assert_success(preview)
+        self.assertEqual(snapshot(self.target), original_files)
+        self.assertIn("remove mcp_servers.playwright", preview.stdout)
+
+        applied = self.run_sync()
+        self.assert_success(applied)
+        self.assertEqual(preview.stdout, applied.stdout)
+        after = tomllib.loads((self.target / "config.toml").read_text())
+        self.assertNotIn("playwright", after["mcp_servers"])
+        self.assertEqual(after["plugins"], before["plugins"])
+        self.assertEqual(after["mcp_servers"]["node_repl"], before["mcp_servers"]["node_repl"])
+        self.assertEqual(after["mcp_servers"]["example"]["command"], "npx")
+
+        repeated = self.run_sync()
+        self.assert_success(repeated)
+        self.assertEqual(repeated.stdout.strip(), "No changes.")
+
     def test_only_owned_skill_contents_are_deleted(self):
         protected = [
             "skills/.system/builtin/SKILL.md",

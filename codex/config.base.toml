@@ -49,10 +49,6 @@ command = "npx"
 args = ["-y", "@notionhq/notion-mcp-server"]
 env_vars = ["NOTION_TOKEN"]
 
-[mcp_servers.playwright]
-command = "npx"
-args = ["@playwright/mcp@latest"]
-
 [mcp_servers.rea]
 command = "/opt/homebrew/opt/node/bin/npx"
 args = ["-y", "rea-agents@6.8.0", "mcp"]
