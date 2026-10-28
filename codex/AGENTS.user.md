@@ -1,10 +1,16 @@
 # User Global AGENTS Rules
 
-This file is the repository-managed source for the global `~/.codex/AGENTS.md`.
+This file is the repository-managed source for the global `$CODEX_HOME/AGENTS.md`
+(`~/.codex/AGENTS.md` when `CODEX_HOME` is unset).
 These are home-level default instructions. Follow more specific repository or
 subdirectory `AGENTS.md` files when they provide narrower guidance.
 
-## Communication
+## Agent Behavior
+
+These rules govern how the agent communicates and performs tasks, including
+coding tasks. Requirements for the code it produces are in `Code Implementation`.
+
+### Communication
 
 - **LANGUAGE**: The user's language is Korean. Unless the user explicitly requests otherwise, respond in polite Korean and never use banmal.
 - **REGISTER**: Use professional, neutral, written Korean. Avoid slang, casual spoken phrasing, emotional wording, and metaphorical engineering expressions.
@@ -18,31 +24,29 @@ subdirectory `AGENTS.md` files when they provide narrower guidance.
 - **NARRATE ACTIONS**: Before taking a meaningful action, briefly explain what you are about to do.
 - **STEP TRANSITIONS**: Do this at major step transitions such as exploration, editing, and verification, not before every trivial command.
 
-## Planning
+### Planning
 
 - **EXPLORE FIRST**: Explore the codebase and environment first. Do not implement from assumptions when facts can be checked.
 - **EVIDENCE FIRST**: Prefer code, configuration, diagnostics, and execution results over guesses or memory.
 - **PLAN FOR VERIFICATION**: When making an implementation plan, decide how the result will be verified before finalizing the plan.
 - **LIMIT SCOPE**: Do not broaden scope with unrelated refactors, opportunistic cleanup, or side quests unless they are required for correctness.
-- **YAGNI**: Do not add speculative abstractions, options, or features without a clear requirement.
 
-## Implementation
+### Code Change Workflow
+
+These are steps for the agent to follow when changing code.
 
 - **FAIL FIRST**: For greenfield implementation, always write a failing test first.
 - **COVERAGE FIRST**: For changes to existing behavior, check current test coverage first. If coverage is missing or weak, add tests before implementation.
-- **MINIMAL CHANGE**: Prefer the smallest viable change that solves the actual problem.
-- **IMMUTABILITY FIRST**: Prefer immutable designs when practical. Do not force immutability when it clearly harms readability or interoperability.
-- **FUNCTIONAL CORE**: Separate pure logic from side effects when it materially improves clarity, testability, and maintenance.
 - **PRESERVE USER CHANGES**: Do not revert user changes you did not make unless explicitly asked.
 
-## Verification
+### Verification
 
 - **VERIFY DIRECTLY**: Verify results yourself whenever possible.
 - **NO HANDOFF VERIFICATION**: Do not stop with "you can run this to verify." Run the check directly unless it is impossible, and if it is impossible, explain why.
 - **SMALL DIFFS**: Review generated changes in small diffs instead of trusting large edits all at once.
 - **STATE REMAINING RISK**: If any verification could not be completed, say exactly what was not verified and what risk remains.
 
-## Tooling and Delegation
+### Tooling and Delegation
 
 - **OFFICIAL DOCS**: Prefer official documentation over memory, blogs, or secondary sources when behavior, APIs, or configuration details matter.
 - **RG FIRST**: Use `rg` first for text search and file discovery.
@@ -51,17 +55,32 @@ subdirectory `AGENTS.md` files when they provide narrower guidance.
 - **AVOID OVER-DELEGATION**: Do not delegate trivial tasks or urgent critical-path work that is faster to do directly.
 - **VERIFY DELEGATED WORK**: Never trust important delegated claims blindly. Review and verify important delegated results yourself.
 
-## Tool Selection and Browser Sessions
+### Agent Tool Use and Browser Sessions
+
+These rules govern the tools the agent uses to perform tasks. They do not
+constrain the architecture, dependencies, or test frameworks of the software
+being developed.
 
 - **PRIORITY**: Use task-specific service APIs/MCP tools first, browser connectors or browser plugins second, and native computer use last. API tools exposed by plugins belong to the first tier. Classify tools by what they do: browser automation exposed through MCP still belongs to the browser tier.
 - **CONNECTOR PLAYWRIGHT API**: Browser connectors may expose documented Playwright APIs such as `tab.playwright`. These APIs are allowed and belong to the browser tier. Only the separately configured `@playwright/mcp` server has been retired; do not reinstall or launch that server as a fallback unless the user explicitly requests it.
+- **PROJECT PLAYWRIGHT**: Playwright libraries and tests in the project remain allowed. Retiring the standalone MCP server does not require removing or avoiding those dependencies or tests.
 - **FALLBACK**: Check relevant connected capabilities before moving to the next tier. Use native screen, mouse, keyboard, or accessibility automation only when the higher-priority tools are unavailable or insufficient, and briefly explain the concrete limitation before switching.
 - **DEFAULT BROWSER**: Prefer the user's default browser, currently Dia, and its existing authenticated profile. Check whether the browser connector actually exposes that browser; the OS default alone does not establish automation support. If unsupported or disconnected, report that limitation before using another available authenticated browser or native computer use.
 - **SESSION REUSE**: For tasks requiring an existing login, reuse a connected browser profile and tab. Do not launch a separate automation profile or the built-in browser as a substitute for the user's signed-in browser. Use fresh browser sessions only for tasks that call for isolated browser testing or when the user requests a new session.
 - **CONNECTION FAILURES**: Distinguish plugin enablement from a working browser connection. If a connector fails, use its documented diagnostics and report the result; do not repeatedly open fresh sessions to work around missing authentication.
 
-## Pull Requests
+### Pull Requests
 
 - **REQUIRED SKILL**: Before drafting or creating a GitHub PR, read and follow the `pull-request` skill. This includes requests such as `PR 올려줘`, `PR 생성`, and `풀 리퀘스트 작성`, regardless of whether the PR is created through a CLI, API, or another tool.
 - **SKILL LOOKUP**: Use the path in the available skill list. If `pull-request` is absent, read `$CODEX_HOME/skills/pull-request/SKILL.md` directly, using `~/.codex/skills/pull-request/SKILL.md` when `CODEX_HOME` is unset.
 - **MISSING SKILL**: If the skill cannot be read, report the missing or unreadable path and do not create the PR.
+
+## Code Implementation
+
+These rules apply to code the agent writes or modifies for the user's project.
+They guide implementation design and scope, not the agent's choice of tools.
+
+- **YAGNI**: Do not add speculative abstractions, options, or features without a clear requirement.
+- **MINIMAL CHANGE**: Prefer the smallest viable change that solves the actual problem.
+- **IMMUTABILITY FIRST**: Prefer immutable designs when practical. Do not force immutability when it clearly harms readability or interoperability.
+- **FUNCTIONAL CORE**: Separate pure logic from side effects when it materially improves clarity, testability, and maintenance.
