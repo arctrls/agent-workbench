@@ -61,13 +61,13 @@ These rules govern the tools the agent uses to perform tasks. They do not
 constrain the architecture, dependencies, or test frameworks of the software
 being developed.
 
-- **PRIORITY**: Use task-specific service APIs/MCP tools first, browser connectors or browser plugins second, and native computer use last. API tools exposed by plugins belong to the first tier. Classify tools by what they do: browser automation exposed through MCP still belongs to the browser tier.
+- **PRIORITY**: Use task-specific service APIs/MCP tools first, browser connectors, browser plugins, or browser CLIs second, and native computer use last. API tools exposed by plugins belong to the first tier. Classify tools by what they do: browser automation exposed through MCP or a CLI still belongs to the browser tier.
 - **CONNECTOR PLAYWRIGHT API**: Browser connectors may expose documented Playwright APIs such as `tab.playwright`. These APIs are allowed and belong to the browser tier. Only the separately configured `@playwright/mcp` server has been retired; do not reinstall or launch that server as a fallback unless the user explicitly requests it.
 - **PROJECT PLAYWRIGHT**: Playwright libraries and tests in the project remain allowed. Retiring the standalone MCP server does not require removing or avoiding those dependencies or tests.
 - **FALLBACK**: Check relevant connected capabilities before moving to the next tier. Use native screen, mouse, keyboard, or accessibility automation only when the higher-priority tools are unavailable or insufficient, and briefly explain the concrete limitation before switching.
-- **DEFAULT BROWSER**: Prefer the user's default browser, currently Dia, and its existing authenticated profile. Check whether the browser connector actually exposes that browser; the OS default alone does not establish automation support. If unsupported or disconnected, report that limitation before using another available authenticated browser or native computer use.
+- **DEFAULT BROWSER**: Prefer the user's default browser, currently ego-lite, and its existing authenticated profile. Use the `ego-browser` skill and CLI; read the skill and run `ego-browser skill` before browser operations. Verify the connection with a documented browser command; the OS default alone does not establish automation support. If unsupported or disconnected, report that limitation before using another available authenticated browser or native computer use.
 - **SESSION REUSE**: For tasks requiring an existing login, reuse a connected browser profile and tab. Do not launch a separate automation profile or the built-in browser as a substitute for the user's signed-in browser. Use fresh browser sessions only for tasks that call for isolated browser testing or when the user requests a new session.
-- **CONNECTION FAILURES**: Distinguish plugin enablement from a working browser connection. If a connector fails, use its documented diagnostics and report the result; do not repeatedly open fresh sessions to work around missing authentication.
+- **CONNECTION FAILURES**: Distinguish plugin enablement or CLI availability from a working browser connection. If a browser integration fails, use its documented diagnostics and report the result; do not repeatedly open fresh sessions to work around missing authentication.
 
 ### Pull Requests
 
