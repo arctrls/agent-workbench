@@ -18,7 +18,7 @@ import sync as codex_sync
 
 
 BASE = '''[features]
-multi_agent = true
+multi_agent_v2 = true
 
 [mcp_servers.example]
 command = "npx"
@@ -125,6 +125,8 @@ class CodexSyncTests(unittest.TestCase):
         base = tomllib.loads((REPO / "codex/config.base.toml").read_text())
         self.assertEqual(set(base), {"features", "mcp_servers", "tui"})
         self.assertFalse(base["tui"]["animations"])
+        self.assertTrue(base["features"]["multi_agent_v2"])
+        self.assertNotIn("multi_agent", base["features"])
 
     def test_managed_keys_update_without_removing_app_settings(self):
         before = tomllib.loads(LOCAL)
@@ -132,7 +134,8 @@ class CodexSyncTests(unittest.TestCase):
         after = tomllib.loads((self.target / "config.toml").read_text())
         for name in ("model", "model_reasoning_effort", "service_tier", "plugins", "desktop"):
             self.assertEqual(after[name], before[name])
-        self.assertTrue(after["features"]["multi_agent"])
+        self.assertTrue(after["features"]["multi_agent_v2"])
+        self.assertNotIn("multi_agent", after["features"])
         self.assertTrue(after["features"]["app_feature"])
         self.assertEqual(after["mcp_servers"]["node_repl"], before["mcp_servers"]["node_repl"])
         server = after["mcp_servers"]["example"]
@@ -141,6 +144,27 @@ class CodexSyncTests(unittest.TestCase):
         self.assertFalse(server["enabled"])
         self.assertEqual(server["env"], {"FIXED": "new", "LOCAL_ONLY": "private-value-do-not-print"})
         self.assertEqual((self.target / "config.toml").stat().st_mode & 0o777, 0o600)
+
+    def test_retired_multi_agent_flag_is_removed(self):
+        for enabled in ("true", "false"):
+            with self.subTest(enabled=enabled):
+                self.write_target("config.toml", LOCAL.replace("multi_agent = false", f"multi_agent = {enabled}"))
+                before = snapshot(self.target)
+                preview = self.run_sync("--dry-run")
+                self.assert_success(preview)
+                self.assertEqual(snapshot(self.target), before)
+                self.assertIn("remove features.multi_agent\n", preview.stdout)
+
+                applied = self.run_sync()
+                self.assert_success(applied)
+                self.assertEqual(preview.stdout, applied.stdout)
+                after = tomllib.loads((self.target / "config.toml").read_text())
+                self.assertNotIn("multi_agent", after["features"])
+                self.assertTrue(after["features"]["multi_agent_v2"])
+                self.assertTrue(after["features"]["app_feature"])
+                repeated = self.run_sync()
+                self.assert_success(repeated)
+                self.assertEqual(repeated.stdout.strip(), "No changes.")
 
     def test_tui_animations_are_managed_without_removing_local_tui_settings(self):
         self.write_source("config.base.toml", BASE + "\n[tui]\nanimations = false\n")
@@ -181,6 +205,27 @@ enabled = true
         self.assertEqual(after["mcp_servers"]["node_repl"], before["mcp_servers"]["node_repl"])
         self.assertEqual(after["mcp_servers"]["example"]["command"], "npx")
 
+        repeated = self.run_sync()
+        self.assert_success(repeated)
+        self.assertEqual(repeated.stdout.strip(), "No changes.")
+
+    def test_retired_atlassian_server_is_removed(self):
+        self.write_target("config.toml", LOCAL + '''
+[mcp_servers.atlassian]
+url = "https://mcp.atlassian.com/v1/mcp/authv2"
+''')
+        original_files = snapshot(self.target)
+        preview = self.run_sync("--dry-run")
+        self.assert_success(preview)
+        self.assertEqual(snapshot(self.target), original_files)
+        self.assertIn("remove mcp_servers.atlassian", preview.stdout)
+
+        applied = self.run_sync()
+        self.assert_success(applied)
+        self.assertEqual(preview.stdout, applied.stdout)
+        after = tomllib.loads((self.target / "config.toml").read_text())
+        self.assertNotIn("atlassian", after["mcp_servers"])
+        self.assertEqual(after["plugins"], tomllib.loads(LOCAL)["plugins"])
         repeated = self.run_sync()
         self.assert_success(repeated)
         self.assertEqual(repeated.stdout.strip(), "No changes.")
