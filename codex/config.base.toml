@@ -18,40 +18,13 @@ DEFAULT_MINIMUM_TOKENS = "6000"
 command = "npx"
 args = ["@anaisbetts/mcp-installer"]
 
-[mcp_servers.mysql-mcp-server]
-command = "uvx"
-args = [
-  "--with",
-  "mcp<2",
-  "awslabs.mysql-mcp-server==1.0.20",
-  "--hostname",
-  "dev-20251223-cluster.cluster-ro-cn1xjryhj9xq.ap-northeast-2.rds.amazonaws.com",
-  "--secret_arn",
-  "arn:aws:secretsmanager:ap-northeast-2:170023315897:secret:database/mcp/dev/credentials-7bZ8iP",
-  "--database",
-  "hmmall",
-  "--region",
-  "ap-northeast-2",
-  "--readonly",
-  "True",
-]
-
-[mcp_servers.mysql-mcp-server.env]
-AWS_PROFILE = "default"
-AWS_REGION = "ap-northeast-2"
-FASTMCP_LOG_LEVEL = "ERROR"
-
 [mcp_servers.notion]
 command = "npx"
 args = ["-y", "@notionhq/notion-mcp-server"]
 env_vars = ["NOTION_TOKEN"]
 
 [mcp_servers.rea]
-command = "/opt/homebrew/opt/node/bin/npx"
+command = "npx"
 args = ["-y", "rea-agents@6.8.0", "mcp"]
 startup_timeout_sec = 30
 tool_timeout_sec = 450
-
-[mcp_servers.rea.env]
-# Use the supported Homebrew Node runtime instead of the shell's older fnm default.
-PATH = "/opt/homebrew/opt/node/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"

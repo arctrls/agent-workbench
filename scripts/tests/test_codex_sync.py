@@ -82,7 +82,7 @@ class CodexSyncTests(unittest.TestCase):
         self.target = self.root / "target"
         self.source.mkdir(parents=True)
         self.target.mkdir()
-        for name in ("sync.sh", "sync.py"):
+        for name in ("sync.sh", "sync.py", "environment.py"):
             if (REPO / "codex" / name).exists():
                 shutil.copy2(REPO / "codex" / name, self.source / name)
         self.write_source("config.base.toml", BASE)
@@ -116,7 +116,8 @@ class CodexSyncTests(unittest.TestCase):
 
     def run_sync(self, *args):
         command = ["/bin/bash", str(self.source / "sync.sh"), "--target-dir", str(self.target)]
-        return subprocess.run(command + list(args), capture_output=True, text=True)
+        return subprocess.run(command + list(args), capture_output=True, text=True,
+                              env=dict(os.environ, AGENT_WORKBENCH_ENV_FILE=str(self.root / "no-env")))
 
     def assert_success(self, result):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)

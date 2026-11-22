@@ -5,7 +5,7 @@ description: Convert Markdown files to PDF with pandoc and WeasyPrint. Use when 
 
 # Markdown To PDF
 
-Convert one Markdown file into a PDF and save it to `~/Downloads`.
+Convert one Markdown file into a PDF and save it to `MD_TO_PDF_OUTPUT_DIR` (default: `~/Downloads`).
 
 Keep the workflow deterministic by using the bundled shell script instead of rewriting the conversion steps inline.
 
@@ -19,7 +19,7 @@ Keep the workflow deterministic by using the bundled shell script instead of rew
 
 ## Behavior
 
-- Write the PDF to `~/Downloads/<input-basename>.pdf`.
+- Write the PDF under `MD_TO_PDF_OUTPUT_DIR`, defaulting to `~/Downloads`. The helper also reads the workbench environment file.
 - If that file already exists, append a timestamp suffix before `.pdf`.
 - Use embedded CSS for a clean document-style layout.
 - Resolve standard Markdown image paths and Obsidian `![[image.png]]` embeds relative to the source note.

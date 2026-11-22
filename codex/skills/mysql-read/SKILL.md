@@ -12,6 +12,8 @@ Default targets:
 - `local`: the current project's local Docker MySQL, reached through the local `mysql` client
 - `dev`: the shared DEV Aurora read endpoint, reached through the local `mysql` client after loading credentials from AWS Secrets Manager
 
+The script loads the workbench per-user environment file before applying process environment and CLI overrides. Use `AGENT_WORKBENCH_ENV_FILE` to select a different file. Dev connections require explicit host, secret ARN, and region; there are no company-specific defaults. Resolve the script from this skill's installed path, not a fixed Codex home.
+
 ## Workflow
 
 1. Decide the target:
@@ -42,11 +44,11 @@ from outside the Spring Boot project.
 ## Commands
 
 ```bash
-~/.codex/skills/mysql-read/scripts/mysql-read.sh --target local --database hmmall --sql "SELECT 1"
+<resolved-skill-directory>/scripts/mysql-read.sh --target local --database <database> --sql "SELECT 1"
 ```
 
 ```bash
-~/.codex/skills/mysql-read/scripts/mysql-read.sh --target dev --database hmmall --sql "SELECT NATION_NO, COUNTRY_ID, DEF_NATION_NM FROM NATION WHERE COUNTRY_ID IN ('US','CA')"
+<resolved-skill-directory>/scripts/mysql-read.sh --target dev --database <database> --sql "SELECT NATION_NO, COUNTRY_ID, DEF_NATION_NM FROM NATION WHERE COUNTRY_ID IN ('US','CA')"
 ```
 
 ## Behavior
@@ -58,9 +60,9 @@ from outside the Spring Boot project.
   - final fallback `127.0.0.1:3306`, user `user`, password `pass`
 - `dev` defaults to:
   - AWS profile `default`
-  - region `ap-northeast-2`
-  - host `dev-20251223-cluster.cluster-ro-cn1xjryhj9xq.ap-northeast-2.rds.amazonaws.com`
-  - secret ARN `arn:aws:secretsmanager:ap-northeast-2:170023315897:secret:database/mcp/dev/credentials-7bZ8iP`
+  - region from `MYSQL_READ_DEV_REGION`, `AWS_REGION`, or `--region`
+  - host from `MYSQL_READ_DEV_HOST` or `--host`
+  - secret ARN from `MYSQL_READ_DEV_SECRET_ARN` or `--secret-arn`
 - Override defaults with flags or env vars when needed.
 - Do not use Docker as a MySQL client shim. The script assumes the local `mysql` client is installed and uses it for both targets.
 - `local` never reads AWS Secrets Manager. `dev` never depends on a local Docker container.

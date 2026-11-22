@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+if [[ "${AGENT_WORKBENCH_ENV_LOADED:-}" != "1" ]]; then
+  helper_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd -P)"
+  exec python3 "$helper_root/with-env.py" bash "${BASH_SOURCE[0]}" "$@"
+fi
+
 usage() {
   cat <<'EOF' >&2
 Usage:
@@ -273,10 +278,10 @@ local_port="${MYSQL_READ_LOCAL_PORT:-}"
 local_user="${MYSQL_READ_LOCAL_USER:-}"
 local_password="${MYSQL_READ_LOCAL_PASSWORD:-}"
 profile="${MYSQL_READ_DEV_PROFILE:-default}"
-region="${MYSQL_READ_DEV_REGION:-ap-northeast-2}"
-dev_host="${MYSQL_READ_DEV_HOST:-dev-20251223-cluster.cluster-ro-cn1xjryhj9xq.ap-northeast-2.rds.amazonaws.com}"
+region="${MYSQL_READ_DEV_REGION:-${AWS_REGION:-}}"
+dev_host="${MYSQL_READ_DEV_HOST:-}"
 dev_port="${MYSQL_READ_DEV_PORT:-3306}"
-secret_arn="${MYSQL_READ_DEV_SECRET_ARN:-arn:aws:secretsmanager:ap-northeast-2:170023315897:secret:database/mcp/dev/credentials-7bZ8iP}"
+secret_arn="${MYSQL_READ_DEV_SECRET_ARN:-}"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -335,10 +340,9 @@ if [[ -z "$target" || -z "$sql" ]]; then
 fi
 
 validate_read_only_sql "$sql"
-require_command mysql
-
 case "$target" in
   local)
+    require_command mysql
     require_command python3
     config_json=$(detect_spring_local_config "$project_dir")
     docker_json=$(detect_docker_mysql)
@@ -366,6 +370,11 @@ case "$target" in
       echo "Error: --database is required for dev" >&2
       exit 1
     fi
+    if [[ -z "${host_override:-$dev_host}" || -z "$secret_arn" || -z "$region" ]]; then
+      echo "Error: set MYSQL_READ_DEV_HOST, MYSQL_READ_DEV_SECRET_ARN and MYSQL_READ_DEV_REGION (or their CLI overrides)" >&2
+      exit 1
+    fi
+    require_command mysql
     require_command aws
     require_command python3
     secret_json=$(AWS_PROFILE="$profile" AWS_REGION="$region" aws secretsmanager get-secret-value \

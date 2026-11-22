@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+if [[ "${AGENT_WORKBENCH_ENV_LOADED:-}" != "1" ]]; then
+  helper_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd -P)"
+  exec python3 "$helper_root/with-env.py" bash "${BASH_SOURCE[0]}" "$@"
+fi
+
 if [[ $# -ne 1 ]]; then
   echo "Error: expected exactly one Markdown file path" >&2
   echo "Usage: md-to-pdf.sh <markdown_file_path>" >&2
@@ -25,7 +30,8 @@ if ! command -v weasyprint >/dev/null 2>&1; then
   exit 1
 fi
 
-output_dir="$HOME/Downloads"
+output_dir="${MD_TO_PDF_OUTPUT_DIR:-$HOME/Downloads}"
+output_dir="${output_dir/#\~/$HOME}"
 mkdir -p "$output_dir"
 
 input_dir=$(cd "$(dirname "$input_file")" && pwd)

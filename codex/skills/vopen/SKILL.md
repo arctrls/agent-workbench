@@ -5,7 +5,7 @@ description: Open a local file in the already-running Neovim instance through th
 
 # Vopen
 
-Open the requested file in the user's already-running Neovim session by calling the local `vopen` command.
+Open the requested file in the user's already-running Neovim session by calling the configured executable (`VOPEN_COMMAND`, default `vopen`). It must be installed separately; this repository does not ship the editor server.
 
 ## Trigger Phrases
 
@@ -22,8 +22,8 @@ Use this skill for requests such as:
 
 1. Resolve the target file path from the user's request.
    Preserve `file:line` targets when provided.
-2. Run `vopen <file>` or `vopen <file> <line>` from the relevant workspace.
-3. If `vopen` reports that the remote socket is missing, tell the user to start Neovim with `vlisten .` in the desired workspace.
+2. Run `python3 <resolved-skill-directory>/scripts/open-file.py <file> [line]` from the relevant workspace. The helper loads the workbench environment file and invokes `VOPEN_COMMAND` without a shell.
+3. If `vopen` reports that the remote socket is missing, tell the user to start Neovim with the configured `VLISTEN_COMMAND` (default `vlisten`) and the workspace path in the desired workspace.
 4. Keep the response brief after a successful open.
 
 ## Command Forms

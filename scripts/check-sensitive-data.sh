@@ -50,13 +50,24 @@ IGNORE_PATTERN='(your-bot-token|your-telegram-token|placeholder|PLACEHOLDER|dumm
 
 cd "$ROOT"
 
+command -v rg >/dev/null 2>&1 || { echo "Error: ripgrep is required" >&2; exit 2; }
 TOTAL=0
 
 for entry in "${PATTERNS[@]}"; do
   IFS='|' read -r label pattern <<< "$entry"
-  matches="$(git ls-files -z | xargs -0 rg -n --color=never --pcre2 --no-heading "$pattern" 2>/dev/null || true)"
+  scan_status=0
+  matches="$(git grep -n -I -E -- "$pattern" -- .)" || scan_status=$?
+  if [[ "$scan_status" -gt 1 ]]; then
+    echo "Error: secret scan failed for $label" >&2
+    exit 2
+  fi
   if [[ -n "$matches" ]]; then
-    filtered="$(printf '%s\n' "$matches" | rg -v -E "$IGNORE_PATTERN" || true)"
+    filter_status=0
+    filtered="$(printf '%s\n' "$matches" | rg -v -e "$IGNORE_PATTERN")" || filter_status=$?
+    if [[ "$filter_status" -gt 1 ]]; then
+      echo "Error: secret allowlist filter failed" >&2
+      exit 2
+    fi
     if [[ -n "$filtered" ]]; then
       echo "[Potential Secret] $label"
       printf '%s\n' "$filtered"

@@ -18,6 +18,8 @@ import sys
 import tempfile
 import tomllib
 
+from environment import load_environment
+
 
 MANAGED_SECTIONS = {"features", "mcp_servers", "tui"}
 # Explicit removals of retired repository-owned servers; keep other local servers.
@@ -152,16 +154,45 @@ class ConfigPlan:
                 temporary.unlink(missing_ok=True)
 
 
-def plan_config(source: Path, target: Path) -> ConfigPlan:
+def plan_config(source: Path, target: Path, *, environment: dict[str, str] | None = None) -> ConfigPlan:
     managed = tomllib.loads(source.read_text(encoding="utf-8"))
     unexpected = managed.keys() - MANAGED_SECTIONS
     if unexpected:
         raise ValueError("App-owned config keys are not sync targets: " + ", ".join(sorted(unexpected)))
     if any(not isinstance(value, dict) for value in managed.values()):
         raise ValueError("Managed features, mcp_servers, and tui must be TOML tables")
+    env = environment or {}
+    required = ("MYSQL_READ_DEV_HOST", "MYSQL_READ_DEV_SECRET_ARN", "MYSQL_READ_DEV_DATABASE", "MYSQL_READ_DEV_REGION")
+    supplied = [key for key in required if env.get(key)]
+    if supplied and len(supplied) != len(required):
+        raise ValueError("Missing environment settings: " + ", ".join(key for key in required if not env.get(key)))
+    if supplied:
+        managed.setdefault("mcp_servers", {})["mysql-mcp-server"] = {
+            "command": "uvx",
+            "args": ["--with", "mcp<2", "awslabs.mysql-mcp-server==1.0.20",
+                     "--hostname", env[required[0]], "--secret_arn", env[required[1]],
+                     "--database", env[required[2]], "--region", env[required[3]], "--readonly", "True"],
+            "env": {"AWS_PROFILE": env.get("MYSQL_READ_DEV_PROFILE", "default"),
+                    "AWS_REGION": env[required[3]], "FASTMCP_LOG_LEVEL": "ERROR"},
+        }
+    rea = managed.get("mcp_servers", {}).get("rea")
+    if rea is not None:
+        rea["command"] = str(Path(env["REA_NPX"]).expanduser()) if env.get("REA_NPX") else "npx"
+        if env.get("REA_NODE_PATH"):
+            rea["env"] = {"PATH": str(Path(env["REA_NODE_PATH"]).expanduser()) + os.pathsep + env.get("PATH", os.defpath)}
     original = read_existing(target)
     current = tomllib.loads(original.decode("utf-8")) if original is not None else {}
+    if rea is not None and "REA_NPX" not in env:
+        # A fresh checkout must not discard an existing machine's working runtime override.
+        existing_rea = current.get("mcp_servers", {}).get("rea", {})
+        if existing_rea.get("command"):
+            rea["command"] = existing_rea["command"]
     merged, changes = merge_managed(current, managed)
+    if rea is not None and "REA_NODE_PATH" in env and not env["REA_NODE_PATH"]:
+        rea_env = merged["mcp_servers"]["rea"].get("env", {})
+        if "PATH" in rea_env:
+            del rea_env["PATH"]
+            changes.append("remove mcp_servers.rea.env.PATH")
     features = merged.get("features", {})
     retired_features = features.keys() & RETIRED_FEATURES
     if retired_features:
@@ -221,6 +252,9 @@ def file_syncs(source: Path, target: Path) -> list[FileSync]:
         FileSync(source / "prompts", target / "prompts", directory=True),
         FileSync(source / "AGENTS.user.md", target / "AGENTS.md"),
     ]
+    for helper in ("environment.py", "with-env.py"):
+        if (source / helper).is_file():
+            operations.append(FileSync(source / helper, target / helper))
     skills = source / "skills"
     if not skills.is_dir():
         raise ValueError(f"Skills source directory is missing: {skills}")
@@ -238,7 +272,7 @@ def file_syncs(source: Path, target: Path) -> list[FileSync]:
     return operations
 
 
-def sync(source: Path, target: Path, *, dry_run: bool):
+def sync(source: Path, target: Path, *, dry_run: bool, environment=None, shared_skills: Path | None = None):
     target = target.expanduser().absolute()
     resolved_target = target.resolve()
     if (resolved_target == source or source in resolved_target.parents
@@ -246,8 +280,24 @@ def sync(source: Path, target: Path, *, dry_run: bool):
         raise ValueError("Sync target must not overlap the codex source directory")
     validate_target(target, target, directory=True)
     validate_target(target / "config.toml", target, directory=False)
-    config = plan_config(source / "config.base.toml", target / "config.toml")
+    config = plan_config(source / "config.base.toml", target / "config.toml", environment=environment)
     operations = file_syncs(source, target)
+    links = []
+    if shared_skills is not None:
+        shared_skills = shared_skills.expanduser().absolute()
+        validate_target(shared_skills, shared_skills, directory=True)
+        if shared_skills.resolve() == (target / "skills").resolve():
+            raise ValueError("Shared discovery directory must differ from installed skills directory")
+        for operation in operations:
+            if operation.source.parent != source / "skills":
+                continue
+            link = shared_skills / operation.source.name
+            destination = operation.target.resolve()
+            if link.is_symlink() and link.resolve() == destination:
+                continue
+            if link.exists() or link.is_symlink():
+                raise ValueError(f"Shared skill already exists with a different owner: {link}")
+            links.append((link, destination))
     rsync = shutil.which("rsync")
     if rsync is None:
         raise ValueError("rsync is required; no files were changed")
@@ -266,7 +316,9 @@ def sync(source: Path, target: Path, *, dry_run: bool):
         print(f"{operation.target.relative_to(target)}:")
         for line in preview.splitlines():
             print(f"  {line}")
-    if config.output is None and not previews:
+    for link, _ in links:
+        print(f"shared skills: link {link.name}")
+    if config.output is None and not previews and not links:
         print("No changes.")
     if dry_run:
         return
@@ -275,15 +327,44 @@ def sync(source: Path, target: Path, *, dry_run: bool):
     for operation, _ in previews:
         operation.target.parent.mkdir(parents=True, exist_ok=True)
         subprocess.run(operation.command(rsync, preview=False), capture_output=True, text=True, check=True)
+    for link, destination in links:
+        link.parent.mkdir(parents=True, exist_ok=True)
+        link.symlink_to(destination, target_is_directory=True)
+
+
+def content_target(target: Path) -> Path:
+    """Follow an existing account's deliberate content sharing, never its auth."""
+    target = target.expanduser().absolute()
+    config = target / "config.toml"
+    if not config.is_symlink():
+        return target
+    shared = config.resolve().parent
+    if config.resolve().name != "config.toml" or shared == target:
+        raise ValueError("Invalid shared config target")
+    for name in ("AGENTS.md", "skills", "prompts"):
+        entry = target / name
+        if not entry.is_symlink() or entry.resolve() != (shared / name).resolve():
+            raise ValueError("Account has partially shared content; select its canonical --target-dir explicitly")
+    return shared
+
+
+def default_target() -> Path:
+    return Path(os.environ.get("CODEX_HOME") or Path.home() / ".codex").expanduser()
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--dry-run", action="store_true", help="Show the same change plan without writing target files")
-    parser.add_argument("--target-dir", type=Path, default=Path.home() / ".codex", help="Codex target directory (default: ~/.codex)")
+    parser.add_argument("--target-dir", type=Path, help="Codex target directory (default: CODEX_HOME or ~/.codex)")
+    parser.add_argument("--shared-skills-dir", type=Path, help="Publish owned skill links here (normally ~/.agents/skills)")
     args = parser.parse_args()
     try:
-        sync(Path(__file__).resolve().parent, args.target_dir, dry_run=args.dry_run)
+        # An explicit target is isolated unless its discovery directory is also explicit.
+        shared = args.shared_skills_dir
+        if shared is None and args.target_dir is None:
+            shared = Path.home() / ".agents/skills"
+        sync(Path(__file__).resolve().parent, args.target_dir or content_target(default_target()),
+             dry_run=args.dry_run, environment=load_environment(), shared_skills=shared)
     except subprocess.CalledProcessError as error:
         print(f"Sync failed: {error.stderr.strip()}", file=sys.stderr)
         return 1

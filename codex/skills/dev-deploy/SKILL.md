@@ -11,7 +11,7 @@ Reset local `dev` to the latest `origin/dev`, merge the current branch into `dev
 
 1. Check the current branch and working tree.
 2. Keep unrelated local edits out of the deploy scope.
-3. Run the bundled script with the current branch as the source.
+3. Resolve the script relative to this installed SKILL.md and run it with the current branch as the source.
 4. If the script reports a merge conflict, stop immediately and ask the user:
    `1. Recreate origin/dev from origin/main, then merge the current branch.`
    `2. Stop.`
@@ -21,7 +21,7 @@ Reset local `dev` to the latest `origin/dev`, merge the current branch into `dev
 ## Command
 
 ```bash
-~/.codex/skills/dev-deploy/scripts/dev-deploy.sh <source-branch>
+<resolved-skill-directory>/scripts/dev-deploy.sh <source-branch>
 ```
 
 If `<source-branch>` is omitted, the script uses the current branch name.

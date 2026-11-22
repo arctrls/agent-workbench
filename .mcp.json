@@ -10,27 +10,6 @@
         "NOTION_TOKEN": "${NOTION_TOKEN}"
       }
     },
-    "mysql-mcp-server": {
-      "command": "uvx",
-      "args": [
-        "awslabs.mysql-mcp-server@latest",
-        "--hostname",
-        "dev-20251223-cluster.cluster-ro-cn1xjryhj9xq.ap-northeast-2.rds.amazonaws.com",
-        "--secret_arn",
-        "arn:aws:secretsmanager:ap-northeast-2:170023315897:secret:database/mcp/dev/credentials-7bZ8iP",
-        "--database",
-        "hmmall",
-        "--region",
-        "ap-northeast-2",
-        "--readonly",
-        "True"
-      ],
-      "env": {
-        "AWS_PROFILE": "default",
-        "AWS_REGION": "ap-northeast-2",
-        "FASTMCP_LOG_LEVEL": "ERROR"
-      }
-    },
     "taskmaster-ai": {
       "command": "npx",
       "args": ["-y", "--package=task-master-ai", "task-master-ai"],
