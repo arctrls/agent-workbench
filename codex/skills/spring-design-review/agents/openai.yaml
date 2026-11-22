@@ -1,0 +1,4 @@
+interface:
+  display_name: "Spring Design Review"
+  short_description: "Review Spring design against shared project criteria"
+  default_prompt: "Use $spring-design-review to compare this Spring change with its agreed behavior and shared design rules, distinguishing rule violations, behavior defects, and improvement proposals."

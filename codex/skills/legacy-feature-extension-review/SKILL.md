@@ -44,7 +44,7 @@ Apply this section only when the extension affects an API or screen.
 
 ## Verify the risk, not the implementation shape
 
-For Java/Kotlin/Spring changes, use the shared [static-check and review boundary](../java-spring-workflow/references/jvm-review-checks.md). Keep configured diagnostic results separate from business and runtime-contract findings. Passing formatting or architecture checks does not establish transaction or delivery correctness.
+For Java/Kotlin/Spring changes, use the shared [static-check and review boundary](../spring-workflow/references/jvm-review-checks.md). Keep configured diagnostic results separate from business and runtime-contract findings. Passing formatting or architecture checks does not establish transaction or delivery correctness.
 
 Select a small set of scenarios that distinguishes a correct extension from a regression: no new records, eligible and not-yet-eligible records, successful external transfer, and failed transfer with expected database state. Add only applicable boundary or retry cases.
 

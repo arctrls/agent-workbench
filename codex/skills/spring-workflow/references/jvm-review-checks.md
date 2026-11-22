@@ -30,6 +30,16 @@ Passing architecture rules proves compliance with those rules, not that the sele
 - Spotless ratcheting selects changed **files**, not changed lines. Separate large formatting changes from behavioral changes. Use a deliberate baseline ref; ensure CI has that ref and does not compare a commit to itself.
 - An exclusion is an unverified scope. Document the reason and keep it narrow; do not exclude whole business modules merely to obtain a passing result.
 
+## Finding categories
+
+Use these categories in implementation self-review and standalone reviews:
+
+- **Rule violation:** cite an applicable user decision, project rule, or shared reference and show the conflicting code. Check local exceptions first; a reviewer's newly preferred design is not an established requirement.
+- **Behavior defect:** identify the intended behavior, concrete trigger or execution path, and consequence. A defect can exist even when every structural rule passes. Do not require a written style rule to report a correctness problem.
+- **Improvement proposal:** explain the benefit and tradeoff of a new design or preference separately. Do not make it a completion blocker without an applicable requirement or demonstrated defect.
+
+Record justified exceptions and unverified behavior separately. Rule compliance, correctness evidence, and design suitability are distinct conclusions. Review against the same criteria that guided implementation; update shared criteria when a new decision is actually accepted.
+
 ## Report
 
 Separate tool results, contextual findings, and verification limits. For a manual finding give `file:line`, the applicable rule or contract, the trigger or reading problem, and its impact. Do not duplicate tool findings or claim an unexecuted check passed.

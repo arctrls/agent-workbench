@@ -11,6 +11,14 @@ global agent defaults used in the local environment.
 - `scripts/`: repository maintenance utilities such as secret checks
 - `.githooks/`: repo-managed Git hooks for automatic Codex sync on push and pull-related flows
 
+## Spring Implementation and Review
+
+Use `spring-workflow` for Java/Kotlin Spring implementation. It connects shared design and language criteria with implementation, automated checks, review, and verification.
+
+- [전체 구현·리뷰 흐름](codex/skills/spring-workflow/references/workflow-overview.md)
+- [개발 워크플로](codex/skills/spring-workflow/SKILL.md)
+- [설계 리뷰](codex/skills/spring-design-review/SKILL.md)
+
 ## Sync Model
 
 This repository syncs only repository-owned configuration outward to local home

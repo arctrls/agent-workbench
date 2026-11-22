@@ -13,13 +13,15 @@ Review Java source against the repository's Java code style rules only. Treat th
 
 1. Confirm the request is a Java style review or Java self-review task.
 2. Identify the Java files under review from the user's scope or `git diff`.
-3. Read the shared [static-check and review boundary](../java-spring-workflow/references/jvm-review-checks.md), then the canonical Java rule reference:
-   - Installed skill path: `../java-spring-workflow/references/java-code-style.md`
-   - Repository source path: `codex/skills/java-spring-workflow/references/java-code-style.md`
+3. Read the shared [static-check and review boundary](../spring-workflow/references/jvm-review-checks.md), then the canonical Java rule reference:
+   - Installed skill path: `../spring-workflow/references/java-code-style.md`
+   - Repository source path: `codex/skills/spring-workflow/references/java-code-style.md`
 4. Discover and run the project's configured checks. Record their scope, exclusions, and results; do not install tools or auto-fix during a read-only review.
 5. Inspect the target Java files and nearby conventions for context-dependent readability issues. Report only clear violations or intentional exceptions, without duplicating tool diagnostics. Do not rewrite code unless fixes are requested.
 
 If the canonical reference is missing, say which path was unavailable and stop instead of inventing replacement rules.
+
+Use the shared [finding categories](../spring-workflow/references/jvm-review-checks.md#finding-categories): cite applicable rules for violations and keep new preferences separate as improvement proposals.
 
 ## Review Focus
 

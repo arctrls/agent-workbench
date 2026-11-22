@@ -1,6 +1,6 @@
 # Spring Framework Rules
 
-Use this reference for Java/Spring planning, implementation, and review. These are structure and interface rules, so they take priority over local style preferences.
+Use this reference for Java or Kotlin Spring planning, implementation, and review. These are structure and interface rules, so they take priority over local style preferences.
 
 Apply explicit user decisions and narrower project rules first. Inspect nearby working use cases before choosing a structure; these defaults do not require converting an existing architecture.
 
@@ -9,13 +9,13 @@ Apply explicit user decisions and narrower project rules first. Inspect nearby w
 - Use verb-led use-case names such as `CreateOrder`, `FindOrders`, or `CancelPayment`.
 - Where the project uses one endpoint class per use case, keep reads, creation, and cancellation in separate use-case classes. Follow that convention instead of introducing a generic `Controller` suffix or a service that only forwards calls.
 - Separate a service when it owns meaningful application logic, serves multiple entry points, or follows a required project boundary; do not add a layer solely because Spring supports it.
-- Prefer immutable request/response records. Use inner `Request` / `Response` records when they belong to one use case; use named `XxxRequest` / `XxxResponse` types when shared across boundaries.
+- Prefer immutable request/response types: Java records where supported, or Kotlin data classes when their value semantics fit. Nest `Request` / `Response` types in their owning use case when appropriate; use named `XxxRequest` / `XxxResponse` types when shared across boundaries.
 - Follow the project's error contract. Where the frontend owns user-facing wording, return stable error codes through the endpoint's exception handler and map them to messages in the frontend.
 - Follow established authentication and authorization boundaries. A project-specific choice to rely on menu permissions does not establish a general rule to remove backend authorization.
 
 ## Persisted and external codes
 
-- Keep persisted or API enum codes independent from Java constant names. Use an explicit `code` and a static conversion method such as `fromCode`; add a description where it helps readers understand the state.
+- Keep persisted or API enum codes independent from language-level constant names. Use an explicit `code` and an explicit conversion such as Java static `fromCode` or a Kotlin companion function; add a description where it helps readers understand the state.
 - Check the actual database and JSON/GraphQL mappings: adding `code` does not help if persistence or serialization still uses `name()` or `valueOf()`.
 - Handle unknown codes explicitly under the compatibility contract; do not silently turn an unknown state into success.
 
@@ -30,20 +30,22 @@ Apply explicit user decisions and narrower project rules first. Inspect nearby w
 
 ## Transactions and concurrency
 
-- Before adding explicit row locks or a non-default isolation level, identify the concrete race, required invariant, and why the existing transaction or conditional write is insufficient.
-- Honor an explicit no-lock requirement; do not add `FOR UPDATE` or equivalent protection speculatively. Report a demonstrated correctness conflict instead of silently changing the agreed design.
+- Do not introduce pessimistic locking when writing or changing queries. This includes `SELECT ... FOR UPDATE`, `SELECT ... FOR SHARE`, and equivalent ORM pessimistic-lock options. A concurrency concern alone does not authorize an exception to this rule.
+- Identify the actual race and invariant, then use an appropriate alternative such as a conditional update with an affected-row check, optimistic version checking, or a unique constraint. Verify that the chosen approach preserves the required behavior; do not assume these alternatives are interchangeable.
+- If the invariant cannot be maintained under this constraint, explain the concrete conflict instead of silently adding a pessimistic lock. Do not remove an existing lock mechanically without assessing its callers, transaction boundary, and replacement concurrency protection.
+- Before adding a non-default isolation level, identify the concrete race, required invariant, and why the existing transaction or conditional write is insufficient.
 - Reuse the project's transaction manager and persistence mechanism. Do not introduce a second database access approach when the existing one meets the need.
 
 ## Package structure
 
 - Prefer package-by-feature over package-by-layer.
 - Keep related controller, use-case, repository interface, domain type, and enum in the same feature package when that matches the existing project direction.
-- Default internal implementation classes to package-private.
-- Expose `public` types only when another package genuinely needs them.
+- In Java, use package-private visibility for implementation details where practical. Kotlin `internal` applies to the compilation module and does not enforce feature-package encapsulation. Use the project's module-boundary checks for those constraints.
+- Deliberately expose boundary types needed by other features, including types in their signatures. Follow the project's API/SPI placement; do not impose a specific subpackage convention on every project.
 
 ## Dependency direction
 
-- High-level use cases should depend on interfaces, not concrete infrastructure classes.
+- At established infrastructure or module boundaries, make high-level use cases depend on the contracts they need. Do not introduce an interface for every class or a forwarding facade without a concrete boundary or substitution need.
 - The client package should own the interface it needs.
 - Infrastructure classes implement those interfaces.
 - Domain code should remain independent from framework and infrastructure concerns where practical.
@@ -57,11 +59,11 @@ Apply explicit user decisions and narrower project rules first. Inspect nearby w
 
 ## Review priorities
 
-When reviewing or self-reviewing Java/Spring changes, check these first:
+When reviewing or self-reviewing Java or Kotlin Spring changes, check these first:
 
 1. Use-case structure that conflicts with the project, including forwarding-only layers
 2. Boundary ownership of request/response records, error codes, and persisted enum codes
 3. Inconsistent operation time or timezone semantics, and unnecessary clock infrastructure
-4. Speculative row locks, isolation overrides, or parallel persistence mechanisms
+4. Newly introduced pessimistic locking, unjustified isolation overrides, or parallel persistence mechanisms
 5. New package-by-layer drift in code that should live under a feature package
 6. Direct dependencies on `Jpa...`, `MySql...`, or other concrete infrastructure classes from high-level use cases

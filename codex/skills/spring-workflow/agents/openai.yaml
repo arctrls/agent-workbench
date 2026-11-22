@@ -1,0 +1,7 @@
+interface:
+  display_name: "Spring Workflow"
+  short_description: "Implement and review Java/Kotlin Spring changes"
+  default_prompt: "Use $spring-workflow to establish the change contract, implement this Spring change using shared design and language rules, review the result, and verify it."
+
+policy:
+  allow_implicit_invocation: false
