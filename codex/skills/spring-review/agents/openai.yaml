@@ -1,0 +1,4 @@
+interface:
+  display_name: "Spring Review"
+  short_description: "Review Spring design, behavior, and Java/Kotlin style"
+  default_prompt: "Use $spring-review to review this Spring package or change, combine relevant checks and design, behavior, and language-specific findings into one report, and leave the code unchanged."

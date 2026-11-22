@@ -17,6 +17,7 @@ Use `spring-workflow` for Java/Kotlin Spring implementation. It connects shared 
 
 - [전체 구현·리뷰 흐름](codex/skills/spring-workflow/references/workflow-overview.md)
 - [개발 워크플로](codex/skills/spring-workflow/SKILL.md)
+- [통합 리뷰 진입점](codex/skills/spring-review/SKILL.md)
 - [설계 리뷰](codex/skills/spring-design-review/SKILL.md)
 
 ## Sync Model

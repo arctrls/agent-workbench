@@ -5,7 +5,9 @@ description: Implement Java or Kotlin Spring changes against shared design and l
 
 # Spring Workflow
 
-Coordinate implementation and review for Java, Kotlin, or mixed Spring projects. Start from the user's concrete request; a separate approved plan is not required when the request already establishes the behavior and scope. For open design questions, establish the relevant decisions before dependent implementation. A review-only request does not authorize edits; use the matching review skill below.
+Coordinate implementation and review for Java, Kotlin, or mixed Spring projects. Start from the user's concrete request; a separate approved plan is not required when the request already establishes the behavior and scope. For open design questions, establish the relevant decisions before dependent implementation. A review-only request starts directly at [spring-review](../spring-review/SKILL.md) without an implementation phase.
+
+The normal sequence is **implementation and relevant checks → `spring-review` → resolve findings → task completion**. Finishing implementation triggers review; it is not yet the completion report.
 
 See the Korean [implementation and review overview](references/workflow-overview.md) for the full flow and responsibility map.
 
@@ -26,8 +28,8 @@ These references are shared with reviewers; do not maintain a second rule list i
 2. **Check the existing implementation and coverage.** Inspect comparable use cases and boundary callers. Protect missing business or regression coverage before changing behavior, following the project's fail-first requirements. Preserve transactions, authorization, serialization, deduplication, external-call order, and cleanup where they apply.
 3. **Implement within that contract.** Apply structural rules while choosing the interface and package, not only during cleanup. Keep the diff scoped; do not add forwarding layers, speculative abstractions, or unrelated legacy cleanup.
 4. **Run configured checks.** Use the project's formatter, compiler, architecture checks, and behavior tests as appropriate. Record commands, checked scope, exclusions, and results. Do not install a prescribed tool stack or expand baselines merely to get a pass.
-5. **Review against the same contract and references.** Use [spring-design-review](../spring-design-review/SKILL.md) for structure and runtime contracts, and [Java](../java-code-style-review/SKILL.md) / [Kotlin](../kotlin-code-style-review/SKILL.md) style review for the changed languages. Read only applicable guidance. Use [legacy feature extension review](../legacy-feature-extension-review/SKILL.md) when an existing operational workflow gains a new path or state. These are review passes, not a requirement to spawn separate agents or repeat checks already run on the same code state.
-6. **Resolve findings.** Within an implementation request, fix clear defects and applicable rule violations, then rerun affected checks. If a finding changes the agreed design, resolve that decision before dependent work. Record justified exceptions; keep optional improvements separate. A new test failure or code change may require renewed review, while unchanged passing checks need not be repeated.
+5. **Hand the implemented change to [spring-review](../spring-review/SKILL.md).** Provide the change contract, reviewed diff/code state, applicable rule sources, and check evidence. It coordinates design, behavior, and relevant language review and returns one consolidated report. Do not ask the user to invoke each review separately or rerun unchanged checks merely because a different review pass is starting.
+6. **Resolve findings.** Within an implementation request, fix clear defects and applicable rule violations, then rerun affected checks and return the changed scope to `spring-review` as needed. If a finding changes the agreed design, resolve that decision before dependent work. Record justified exceptions; keep optional improvements separate. Unchanged passing checks need not be repeated.
 7. **Report completion evidence.** State what changed, the applicable criteria and any exceptions, tool/test results, unresolved findings, and verification limits. Commit, push, publish, or deploy only within the user's authorized scope.
 
 ## Review outcomes
