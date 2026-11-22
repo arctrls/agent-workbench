@@ -1,0 +1,4 @@
+interface:
+  display_name: "Session to Skills"
+  short_description: "Turn session feedback into reusable skill guidance"
+  default_prompt: "Use $session-to-skills to extract reusable lessons from this session and recommend or apply focused skill updates as requested."
