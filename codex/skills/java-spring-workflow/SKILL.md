@@ -70,7 +70,7 @@ Do not bloat the diff chasing every style issue in untouched legacy code. Keep t
 
 ### 4. Run a Java/Spring self-review pass
 
-Before final verification, review the changed files against both references. Check at minimum:
+Read [static checks and JVM review](references/jvm-review-checks.md) and run the project's configured checks. Separate tool-confirmed violations from contextual findings; do not add every suggested tool to the project. Review the changed files against both references. Check at minimum:
 
 - use-case naming and unnecessary controller/service forwarding
 - request/response ownership, error-code mapping, and persisted enum-code conversion

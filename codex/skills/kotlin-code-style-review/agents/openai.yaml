@@ -1,0 +1,4 @@
+interface:
+  display_name: "Kotlin Code Style Review"
+  short_description: "Review Kotlin readability beyond static checks"
+  default_prompt: "Use $kotlin-code-style-review to review the changed Kotlin files, separate static-check results from contextual readability findings, and report actionable issues."
