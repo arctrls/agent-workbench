@@ -10,6 +10,14 @@ Use this reference during Java implementation and Java/Spring review. These rule
   - conditional lookup: `userById(...)`, `ordersFor(...)`, `latestPaymentBy(...)`
 - Command methods mutate state and should start with verbs:
   - `create(...)`, `update(...)`, `cancel(...)`, `process(...)`
+- At use-case level, name the business intent (`save`, `register`, `cancel`) rather than the SQL operation (`insert`, `delete`). SQL-oriented names remain appropriate in persistence mappers.
+
+## Method composition and layout
+
+- Apply the Composed Method Pattern: keep a method's steps at a single level of abstraction (SLA). An orchestration method should read as a business flow, with SQL, conversion, and detailed validation in appropriately named methods.
+- Extract a method when its name explains a meaningful operation or separates abstraction levels. Do not split every statement into a forwarding helper merely to shorten methods.
+- Separate validation, preparation, and execution with blank lines when they are distinct steps. Break long calls, constructor arguments, and conditions into readable lines.
+- Use explicit imports; do not add wildcard imports.
 
 ## Parameters and locals
 
@@ -30,7 +38,7 @@ Use this reference during Java implementation and Java/Spring review. These rule
 - Use Yoda comparisons for nulls, constants, and sentinel values when following this style:
   - `null != value`
   - `EMPTY == this`
-- Short guard clauses are acceptable on one line: `if (!ready) return EMPTY;`
+- For a short, single-statement guard clause, omit braces: `if (!ready) return EMPTY;`. Keep braces for multi-statement branches and where omitting them would obscure control flow.
 - Prefer null-object or sentinel patterns like `EMPTY` over raw `null` when the type already supports that pattern.
 
 ## Collections and iteration
@@ -51,8 +59,10 @@ Use this reference during Java implementation and Java/Spring review. These rule
 
 When reviewing, prioritize these violations:
 
-1. Getter-style accessors where fluent accessors are expected
-2. Missing `final` in touched code when the surrounding code follows the rule
-3. `@Builder` on simple immutable DTOs
-4. Inconsistent logging prefixes in the same feature
-5. Manual loops and mutable collectors where a simple immutable stream pipeline would be clearer
+1. Mixed abstraction levels, unclear business intent, and unnecessary forwarding helpers
+2. Dense layout that obscures processing steps, and wildcard imports
+3. Getter-style accessors where fluent accessors are expected
+4. Missing `final` in touched code when the surrounding code follows the rule
+5. `@Builder` on simple immutable DTOs
+6. Inconsistent logging prefixes in the same feature
+7. Manual loops and mutable collectors where a simple immutable stream pipeline would be clearer

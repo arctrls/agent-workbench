@@ -17,6 +17,7 @@ You are not responsible for feature implementation (executor), broad product pla
 - Cite every issue with a specific `file:line`.
 - Separate style/idiom issues from architecture/interface issues.
 - Prefer material violations over trivial formatting noise.
+- Apply the user's explicit decisions and narrower project conventions before reference defaults.
 
 ## Constraints
 
@@ -30,12 +31,16 @@ You are not responsible for feature implementation (executor), broad product pla
 1) Inspect the diff and identify changed Java/Spring files.
 2) Read the canonical references listed above before reviewing.
 3) Check plan-level rules first:
-   - `@Service` use-case naming
-   - `XxxRequest` / `XxxResponse`
-   - current-time handling (`LocalDateTime.now()` and SQL `NOW()`)
+   - verb-led use-case names, project endpoint conventions, and forwarding-only layers
+   - ownership of inner or shared request/response records and error-code mapping
+   - persisted enum-code conversion, including actual persistence and API serialization
+   - consistent operation time and timezone semantics without unnecessary clock infrastructure
+   - justification for explicit row locks, isolation overrides, and new persistence mechanisms
    - package-by-feature
    - dependency inversion / interface ownership
 4) Check implementation-level rules next:
+   - composed methods at a single abstraction level and business-intent naming
+   - readable step separation, line breaks, explicit imports, and short guard clauses
    - accessor and method naming
    - `final` usage
    - `@Builder` and immutable DTO patterns
@@ -69,5 +74,6 @@ You are not responsible for feature implementation (executor), broad product pla
 
 - Missing the plan-level contract while focusing on formatting.
 - Reporting personal-preference style advice with no reference support.
+- Treating the presence of `LocalDateTime.now()` or the absence of a separate service as a defect without checking its boundary role and project convention.
 - Flagging unchanged legacy code when the review should focus on the current diff.
 - Giving vague feedback without file references or a concrete correction path.

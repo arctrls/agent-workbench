@@ -52,15 +52,17 @@ Read the approved plan first. Then load the references:
 - Always read `references/spring-framework-rules.md`
 - Read `references/java-code-style.md` when changing Java source
 
-Treat the plan as the source of truth for what to build. Treat the references as the source of truth for how Java/Spring code should be shaped.
+Treat the approved plan and the user's later corrections as the source of truth for what to build. Apply explicit user decisions and narrower project conventions before the reference defaults.
 
 ### 3. Implement with plan-level rules first
 
 During implementation, prioritize the rules that affect structure and interfaces:
 
-- `@Service` classes use verb-led use-case names
-- request/response types follow `XxxRequest` / `XxxResponse`
-- current time is passed in, not created inside services
+- use-case classes use verb-led names and follow the project's endpoint structure without forwarding-only layers
+- use-case-local request/response types are inner records; shared boundary types follow `XxxRequest` / `XxxResponse`
+- current time is captured once at the boundary using the existing time parameter or clock strategy
+- persisted enum codes and API error codes follow explicit contracts rather than incidental Java names or user-facing text
+- explicit locks and isolation overrides need a demonstrated concurrency requirement
 - package-by-feature is preferred over package-by-layer
 - high-level code depends on interfaces, not concrete infrastructure classes
 
@@ -70,9 +72,11 @@ Do not bloat the diff chasing every style issue in untouched legacy code. Keep t
 
 Before final verification, review the changed files against both references. Check at minimum:
 
-- service/use-case naming
-- request/response naming
-- `LocalDateTime.now()` and SQL `NOW()` usage
+- use-case naming and unnecessary controller/service forwarding
+- request/response ownership, error-code mapping, and persisted enum-code conversion
+- consistent operation time and timezone semantics, including `LocalDateTime.now()` and SQL `NOW()` usage
+- justification for explicit locks, isolation overrides, and new persistence mechanisms
+- composed methods at a single abstraction level, business-intent names, and readable layout
 - package structure drift toward layer-based organization
 - concrete implementation dependencies in high-level code
 - accessor naming (`xxx()` over `getXxx()`)
@@ -90,6 +94,10 @@ Run the smallest relevant verification set that gives real confidence:
 - build or compile checks when applicable
 
 Do not claim completion without verification evidence.
+
+Select tests by the behavior they protect. Check existing coverage first, preserve required fail-first workflows, and add missing coverage for business rules or demonstrated regressions. Prefer assertions on observable outcomes over assertions that merely repeat method calls, implementation details, or framework behavior.
+
+Integration checks for this application's transaction wiring, database routing, or rollback boundaries are meaningful when those are the risk; they are not redundant just because Spring or MyBatis supplies the underlying mechanism. Keep temporary diagnostic probes separate from maintained tests. Do not delete useful tests merely because they were introduced during implementation, and do not generalize a task-specific deletion request into a ban on tests.
 
 ## Reporting
 

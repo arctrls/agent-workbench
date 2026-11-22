@@ -1,0 +1,4 @@
+interface:
+  display_name: "Legacy Feature Extension Review"
+  short_description: "Review extensions for legacy behavior and transaction safety"
+  default_prompt: "Use $legacy-feature-extension-review to review this feature extension for regressions, transaction boundaries, and user-visible behavior."

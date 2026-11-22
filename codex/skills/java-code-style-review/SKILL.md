@@ -1,6 +1,6 @@
 ---
 name: java-code-style-review
-description: Use when reviewing Java code style, Java naming and idioms, fluent accessors, final parameters or locals, DTO/class shape, logging consistency, stream/collection style, or a Java-only style self-review without implementation.
+description: Review Java readability and style, including composed methods, abstraction levels, business-intent naming, layout, imports, accessors, and DTO shape. Use for Java style reviews or style self-reviews without implementation.
 ---
 
 # Java Code Style Review
@@ -26,6 +26,9 @@ If the canonical reference is missing, say which path was unavailable and stop i
 Use the priority order from `java-code-style.md`. In particular, check:
 
 - fluent record-style accessors instead of getter-style accessors
+- composed methods at a single abstraction level, without unnecessary forwarding helpers
+- business-intent names at use-case level and SQL-oriented names only where persistence details belong
+- readable spacing and line breaks, explicit imports, and short guard clauses
 - `final` on parameters and local variables where surrounding code follows that rule
 - unnecessary `@Builder` on simple immutable DTOs
 - feature-local logging prefix consistency
