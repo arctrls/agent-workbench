@@ -10,7 +10,8 @@ Apply explicit user decisions and narrower project rules first. Inspect nearby w
 - Where the project uses one endpoint class per use case, keep reads, creation, and cancellation in separate use-case classes. Follow that convention instead of introducing a generic `Controller` suffix or a service that only forwards calls.
 - Separate a service when it owns meaningful application logic, serves multiple entry points, or follows a required project boundary; do not add a layer solely because Spring supports it.
 - Prefer immutable request/response types: Java records where supported, or Kotlin data classes when their value semantics fit. Nest `Request` / `Response` types in their owning use case when appropriate; use named `XxxRequest` / `XxxResponse` types when shared across boundaries.
-- Follow the project's error contract. Where the frontend owns user-facing wording, return stable error codes through the endpoint's exception handler and map them to messages in the frontend.
+- Handle use-case failures at the owning controller boundary and return stable, descriptive error codes, such as `DELIVERY_NOT_FOUND`, rather than raw exception messages or opaque numeric codes. The frontend owns user-facing wording and localization. Use the controller's exception handler when appropriate; keep unexpected exception details in server logs.
+- Preserve transaction rollback when converting exceptions into API errors. Do not swallow a failure inside a transaction and return a normal response that allows partial writes to commit.
 - Follow established authentication and authorization boundaries. A project-specific choice to rely on menu permissions does not establish a general rule to remove backend authorization.
 
 ## Persisted and external codes
@@ -45,9 +46,9 @@ Apply explicit user decisions and narrower project rules first. Inspect nearby w
 
 ## Dependency direction
 
-- At established infrastructure or module boundaries, make high-level use cases depend on the contracts they need. Do not introduce an interface for every class or a forwarding facade without a concrete boundary or substitution need.
-- The client package should own the interface it needs.
-- Infrastructure classes implement those interfaces.
+- Use-case controllers own the input, response, and lookup contracts they need. Do not make their public responses depend on DTOs nested in a persistence Mapper, or make the use case depend directly on a SQL/MyBatis Mapper.
+- Infrastructure adapters implement the use-case-owned contracts; persistence Mappers and their row types stay behind that boundary. The dependency points from infrastructure toward the higher-level contract.
+- Reuse an existing suitable repository contract before introducing another interface. Do not introduce an interface for every class or a forwarding facade without a concrete boundary or substitution need.
 - Domain code should remain independent from framework and infrastructure concerns where practical.
 
 ## Cross-package communication

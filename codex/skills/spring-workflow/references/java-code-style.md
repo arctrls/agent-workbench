@@ -21,6 +21,7 @@ Use this reference during Java implementation and Java/Spring review. These rule
 
 ## Parameters and locals
 
+- Do not use Java `var`. Declare explicit local variable types in production code and tests.
 - Add `final` to parameters and local variables unless the surrounding codebase clearly avoids it.
 - Split method or constructor parameters across multiple lines when there are 3+ parameters or the line becomes long.
 - Align each parameter vertically and place the closing `)` on its own aligned line.
