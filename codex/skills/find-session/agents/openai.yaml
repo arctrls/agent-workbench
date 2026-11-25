@@ -1,0 +1,4 @@
+interface:
+  display_name: "이전 세션 찾기"
+  short_description: "날짜·주제·프로젝트로 이전 Codex 대화를 찾고 근거와 재개 명령을 확인합니다"
+  default_prompt: "Use $find-session to find the earlier conversation about this topic and show its evidence and resume command."

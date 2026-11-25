@@ -22,6 +22,11 @@
 - **검사 설정이 없는 프로젝트:** ktlint·detekt·PMD로 기본 검사 가능
 - [전체 흐름과 역할](codex/skills/spring-workflow/references/workflow-overview.md) · [기본 검사 도구 설치·사용](codex/skills/spring-review/references/standalone-checks.md)
 
+## 이전 대화 찾기
+
+- `$find-session`으로 날짜·주제·프로젝트에 맞는 이전 Codex 세션을 검색
+- 대화 근거와 세션 재개 명령을 함께 확인하며, 시간대를 좁혀 먼저 검색
+
 ## 개인 환경 설정
 
 - 파일: `~/.config/agent-workbench/env` · 권한: `600`
