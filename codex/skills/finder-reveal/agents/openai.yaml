@@ -1,0 +1,4 @@
+interface:
+  display_name: "Finder Reveal"
+  short_description: "Reveal local files or open folders in macOS Finder"
+  default_prompt: "Use $finder-reveal to show the current artifact in Finder."

@@ -27,6 +27,11 @@
 - `$find-session`으로 날짜·주제·프로젝트에 맞는 이전 Codex 세션을 검색
 - 대화 근거와 세션 재개 명령을 함께 확인하며, 시간대를 좁혀 먼저 검색
 
+## 파일 위치 열기
+
+- `$finder-reveal` 또는 “Finder로 열어”로 현재 결과 파일을 Finder에서 선택
+- 폴더를 지정하면 Finder에서 폴더 내용 표시 · [사용 방법](codex/skills/finder-reveal/SKILL.md)
+
 ## 개인 환경 설정
 
 - 파일: `~/.config/agent-workbench/env` · 권한: `600`
