@@ -108,6 +108,37 @@ class SharedSkillsTests(unittest.TestCase):
             self.assertFalse((target/'config.toml').exists())
             self.assertEqual((shared/'spring-review/SKILL.md').read_text(),'owned by someone else')
 
+    def test_claude_links_point_to_installed_skills_except_codex_only(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp);target=root/'personal';shared=root/'user-skills';claude=root/'claude-skills'
+            flags=('--claude-skills-dir',str(claude))
+            preview=self.run_sync(target,shared,root/'no-env','--dry-run',*flags)
+            self.assertEqual(preview.returncode,0,preview.stderr)
+            self.assertFalse(claude.exists())
+            self.assertIn('claude skills: link spring-review',preview.stdout)
+            result=self.run_sync(target,shared,root/'no-env',*flags)
+            self.assertEqual(result.returncode,0,result.stderr)
+            self.assertEqual(preview.stdout,result.stdout)
+            link=claude/'spring-review'
+            self.assertTrue(link.is_symlink())
+            self.assertEqual(link.resolve(),(target/'skills/spring-review').resolve())
+            self.assertFalse((claude/'find-session').exists())
+            self.assertTrue((shared/'find-session').is_symlink())
+            again=self.run_sync(target,shared,root/'no-env',*flags)
+            self.assertEqual(again.stdout.strip(),'No changes.')
+
+    def test_foreign_claude_skill_blocks_before_any_changes(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp);target=root/'personal';shared=root/'user-skills';claude=root/'claude-skills'
+            (claude/'commit').mkdir(parents=True)
+            (claude/'commit/SKILL.md').write_text('owned by someone else')
+            result=self.run_sync(target,shared,root/'no-env','--claude-skills-dir',str(claude))
+            self.assertNotEqual(result.returncode,0)
+            self.assertIn('commit',result.stderr)
+            self.assertFalse((target/'config.toml').exists())
+            self.assertFalse(shared.exists())
+            self.assertEqual((claude/'commit/SKILL.md').read_text(),'owned by someone else')
+
     def test_known_shared_account_resolves_content_but_not_auth(self):
         with tempfile.TemporaryDirectory() as tmp:
             root=Path(tmp);primary=root/'personal';other=root/'work'

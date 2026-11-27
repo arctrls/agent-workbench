@@ -16,6 +16,7 @@ directories. It requires Python 3.11+ and `rsync`; no Python packages are needed
   - syncs each repository-owned skill separately, deleting stale files only
     inside that skill's directory
   - publishes per-skill links under `~/.agents/skills` for account-independent discovery
+  - publishes the same links under `~/.claude/skills` for Claude Code, except Codex-only skills (`find-session`)
   - preserves `.system` and skills installed outside this repository
   - generates the selected home's `AGENTS.md` from `codex/AGENTS.user.md`
   - installs the shared `environment.py` / `with-env.py` helpers used by bundled scripts
@@ -103,6 +104,7 @@ uv run --python 3.13 python codex/migrate-env.py
 - `auth.json`, 로그인 상태, 대화 기록과 SQLite 데이터는 복사하거나 합치지 않습니다.
 - 기존 계정 홈이 전체 관리 콘텐츠를 심볼릭 링크로 공유한다면 원본 홈에 동기화합니다. 인증은 계정별로 유지합니다.
 - `--target-dir`를 지정하면 격리 설치로 간주해 공통 경로에 쓰지 않습니다. 공통 연결도 원하면 `--shared-skills-dir <directory>`를 함께 지정합니다. Codex의 기본 사용자 탐색 위치는 `~/.agents/skills`입니다.
+- Claude Code는 `~/.agents/skills`를 읽지 않으므로 `~/.claude/skills/<skill-name>`에도 같은 설치본을 가리키는 링크를 만듭니다. Codex 대화 기록만 검색하는 `find-session`은 제외합니다. `--target-dir` 지정 시에는 `--claude-skills-dir <directory>`를 함께 지정해야 연결합니다. Claude Code는 홈 안쪽 작업 경로에서 `~/AGENTS.md`도 직접 읽습니다(v2.1.277+). [Claude Code 메모리 문서](https://code.claude.com/docs/en/memory#agents-md)
 - `spring-workflow`는 기존 정책대로 명시적 호출용입니다. `$spring-workflow`로 호출합니다. 자동 선택 목록과 명시적 호출 가능 여부를 구분하세요.
 - 설치 후 현재 프로세스에 반영되지 않으면 새 세션에서 확인합니다. 플러그인 포함 스킬의 계정 권한은 로컬 스킬 공유와 별개입니다.
 

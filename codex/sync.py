@@ -26,6 +26,8 @@ MANAGED_SECTIONS = {"features", "mcp_servers", "tui"}
 RETIRED_MCP_SERVERS = {"atlassian", "playwright"}
 # Explicit removals of retired repository-owned feature flags.
 RETIRED_FEATURES = {"multi_agent"}
+# Skills that only make sense inside Codex (e.g. they read Codex history); not linked for Claude Code.
+CODEX_ONLY_SKILLS = frozenset({"find-session"})
 BARE_KEY = re.compile(r"^[A-Za-z0-9_-]+$")
 
 
@@ -272,7 +274,29 @@ def file_syncs(source: Path, target: Path) -> list[FileSync]:
     return operations
 
 
-def sync(source: Path, target: Path, *, dry_run: bool, environment=None, shared_skills: Path | None = None):
+def plan_skill_links(directory: Path, label: str, operations: list[FileSync], source: Path, target: Path,
+                     *, exclude: frozenset[str] = frozenset()) -> list[tuple[str, Path, Path]]:
+    """Plan per-skill links into a discovery directory, refusing entries owned by others."""
+    directory = directory.expanduser().absolute()
+    validate_target(directory, directory, directory=True)
+    if directory.resolve() == (target / "skills").resolve():
+        raise ValueError(f"{label} directory must differ from installed skills directory")
+    links = []
+    for operation in operations:
+        if operation.source.parent != source / "skills" or operation.source.name in exclude:
+            continue
+        link = directory / operation.source.name
+        destination = operation.target.resolve()
+        if link.is_symlink() and link.resolve() == destination:
+            continue
+        if link.exists() or link.is_symlink():
+            raise ValueError(f"{label} already exists with a different owner: {link}")
+        links.append((label, link, destination))
+    return links
+
+
+def sync(source: Path, target: Path, *, dry_run: bool, environment=None, shared_skills: Path | None = None,
+         claude_skills: Path | None = None):
     target = target.expanduser().absolute()
     resolved_target = target.resolve()
     if (resolved_target == source or source in resolved_target.parents
@@ -284,20 +308,10 @@ def sync(source: Path, target: Path, *, dry_run: bool, environment=None, shared_
     operations = file_syncs(source, target)
     links = []
     if shared_skills is not None:
-        shared_skills = shared_skills.expanduser().absolute()
-        validate_target(shared_skills, shared_skills, directory=True)
-        if shared_skills.resolve() == (target / "skills").resolve():
-            raise ValueError("Shared discovery directory must differ from installed skills directory")
-        for operation in operations:
-            if operation.source.parent != source / "skills":
-                continue
-            link = shared_skills / operation.source.name
-            destination = operation.target.resolve()
-            if link.is_symlink() and link.resolve() == destination:
-                continue
-            if link.exists() or link.is_symlink():
-                raise ValueError(f"Shared skill already exists with a different owner: {link}")
-            links.append((link, destination))
+        links += plan_skill_links(shared_skills, "shared skills", operations, source, target)
+    if claude_skills is not None:
+        links += plan_skill_links(claude_skills, "claude skills", operations, source, target,
+                                  exclude=CODEX_ONLY_SKILLS)
     rsync = shutil.which("rsync")
     if rsync is None:
         raise ValueError("rsync is required; no files were changed")
@@ -316,8 +330,8 @@ def sync(source: Path, target: Path, *, dry_run: bool, environment=None, shared_
         print(f"{operation.target.relative_to(target)}:")
         for line in preview.splitlines():
             print(f"  {line}")
-    for link, _ in links:
-        print(f"shared skills: link {link.name}")
+    for label, link, _ in links:
+        print(f"{label}: link {link.name}")
     if config.output is None and not previews and not links:
         print("No changes.")
     if dry_run:
@@ -327,7 +341,7 @@ def sync(source: Path, target: Path, *, dry_run: bool, environment=None, shared_
     for operation, _ in previews:
         operation.target.parent.mkdir(parents=True, exist_ok=True)
         subprocess.run(operation.command(rsync, preview=False), capture_output=True, text=True, check=True)
-    for link, destination in links:
+    for _, link, destination in links:
         link.parent.mkdir(parents=True, exist_ok=True)
         link.symlink_to(destination, target_is_directory=True)
 
@@ -357,14 +371,17 @@ def main() -> int:
     parser.add_argument("--dry-run", action="store_true", help="Show the same change plan without writing target files")
     parser.add_argument("--target-dir", type=Path, help="Codex target directory (default: CODEX_HOME or ~/.codex)")
     parser.add_argument("--shared-skills-dir", type=Path, help="Publish owned skill links here (normally ~/.agents/skills)")
+    parser.add_argument("--claude-skills-dir", type=Path, help="Publish owned skill links for Claude Code (normally ~/.claude/skills)")
     args = parser.parse_args()
     try:
-        # An explicit target is isolated unless its discovery directory is also explicit.
+        # An explicit target is isolated unless its discovery directories are also explicit.
         shared = args.shared_skills_dir
-        if shared is None and args.target_dir is None:
-            shared = Path.home() / ".agents/skills"
+        claude = args.claude_skills_dir
+        if args.target_dir is None:
+            shared = shared or Path.home() / ".agents/skills"
+            claude = claude or Path.home() / ".claude/skills"
         sync(Path(__file__).resolve().parent, args.target_dir or content_target(default_target()),
-             dry_run=args.dry_run, environment=load_environment(), shared_skills=shared)
+             dry_run=args.dry_run, environment=load_environment(), shared_skills=shared, claude_skills=claude)
     except subprocess.CalledProcessError as error:
         print(f"Sync failed: {error.stderr.strip()}", file=sys.stderr)
         return 1
