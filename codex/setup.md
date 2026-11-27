@@ -78,7 +78,7 @@ MYSQL_READ_DEV_PROFILE=default
 | `MD_TO_PDF_OUTPUT_DIR` | 선택, `~/Downloads` | PDF 저장 디렉터리. `~` 경로를 지원합니다. |
 | `BROWSER` | 선택, 사용자 기본 브라우저 | 브라우저 선택 선호. 프로세스 환경에 설정하며 자동화 연결 가능 여부는 따로 확인합니다. |
 
-기존 `.mcp.json`의 `NOTION_TOKEN`, `GITHUB_PERSONAL_ACCESS_TOKEN`, `DD_API_KEY`, `DD_APP_KEY`는 해당 커넥터를 사용할 때만 호스트가 제공할 인증 환경변수입니다. 이 환경 파일이 모든 MCP 클라이언트에 자동 적용되는 것은 아닙니다. Codex MySQL 설정은 위 값을 읽는 sync에서 생성하며, 공개 `.mcp.json`에는 회사 MySQL 기본 설정을 포함하지 않습니다.
+`codex/config.base.toml`의 Notion MCP가 사용하는 `NOTION_TOKEN`은 해당 커넥터를 사용할 때만 호스트가 제공할 인증 환경변수입니다. 이 환경 파일이 모든 MCP 클라이언트에 자동 적용되는 것은 아닙니다. Codex MySQL 설정은 위 값을 읽는 sync에서 생성하며, 공개 설정 파일에는 회사 MySQL 기본 설정을 포함하지 않습니다.
 
 MySQL 변수 네 개가 모두 없으면 신규 MySQL MCP를 만들지 않고 **이미 설치된 MySQL 설정은 유지**합니다. 일부만 설정하면 쓰기 전에 오류로 종료합니다. REA도 새 override가 없으면 기존 실행 경로를 보존합니다. 따라서 다른 컴퓨터에서 업데이트해도 기존 연결 정보를 빈 값으로 덮어쓰지 않습니다.
 
@@ -120,7 +120,7 @@ python3 scripts/verify-codex-skills.py --home ~/.codex --home /path/to/other-cod
 
 - 로컬 경로 마켓플레이스이므로 Claude Code는 복사본 없이 이 저장소의 `codex/skills`를 직접 읽습니다. 수정 사항은 새 세션 또는 `/reload-plugins`에서 반영되며 재설치가 필요 없습니다.
 - sync(`--target-dir` 미지정, 또는 `--claude-plugin`)는 `claude` CLI가 있으면 마켓플레이스와 플러그인 등록을 확인합니다. 없거나 다른 clone 경로로 등록되어 있으면 이 clone으로 다시 등록합니다. 다른 컴퓨터에서는 clone 후 `./codex/sync.sh`를 한 번 실행하면 됩니다.
-- 플러그인 루트를 저장소 루트가 아닌 `codex/`로 둡니다. 저장소 루트의 `.mcp.json`이 플러그인 MCP 서버로 함께 로드되지 않게 하기 위해서입니다.
+- 플러그인 루트를 저장소 루트가 아닌 `codex/`로 둡니다. 저장소 루트에 `.mcp.json` 같은 파일이 생겨도 플러그인 구성 요소로 함께 로드되지 않게 하기 위해서입니다.
 - 스킬을 추가하거나 삭제하면 `codex/.claude-plugin/marketplace.json`의 `skills` 목록도 갱신합니다. 목록이 다르면 sync가 변경 전에 중단합니다. Codex 대화 기록만 검색하는 `find-session`은 목록에서 제외합니다.
 - Claude Code는 홈 안쪽 작업 경로에서 `~/AGENTS.md`를 직접 읽습니다(v2.1.277+). [Claude Code 메모리 문서](https://code.claude.com/docs/en/memory#agents-md)
 
