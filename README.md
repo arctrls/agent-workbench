@@ -45,10 +45,10 @@
 
 - 계정 홈: `--target-dir` → `CODEX_HOME` → `~/.codex`
 - 공통 스킬: `~/.agents/skills`에서 계정과 무관하게 발견
-- Claude Code 스킬: `~/.claude/skills`에 같은 설치본 링크 (`find-session` 제외)
+- Claude Code 스킬: sync가 `codex/`를 플러그인 `z`로 등록, `/z:<skill>`로 호출 (`find-session` 제외)
 - 보존: 계정 인증·대화 기록·모델 설정·외부 설치 스킬
 - 관리 스킬 내부의 오래된 파일은 삭제될 수 있으므로 저장소 원본에서 수정
-- `--target-dir` 지정 시 공통·Claude 스킬 연결 생략; 필요하면 `--shared-skills-dir`, `--claude-skills-dir` 추가
+- `--target-dir` 지정 시 공통 스킬 연결과 Claude 플러그인 등록 생략; 필요하면 `--shared-skills-dir`, `--claude-plugin` 추가
 - 선택 사항: `git config core.hooksPath .githooks`로 push·merge·rebase 후크 동기화 활성화
 
 ## 검증

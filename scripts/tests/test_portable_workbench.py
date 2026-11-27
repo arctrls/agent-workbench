@@ -1,5 +1,7 @@
 from pathlib import Path
 import importlib.util
+import json
+import shutil
 import os
 import subprocess
 import sys
@@ -108,37 +110,6 @@ class SharedSkillsTests(unittest.TestCase):
             self.assertFalse((target/'config.toml').exists())
             self.assertEqual((shared/'spring-review/SKILL.md').read_text(),'owned by someone else')
 
-    def test_claude_links_point_to_installed_skills_except_codex_only(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            root=Path(tmp);target=root/'personal';shared=root/'user-skills';claude=root/'claude-skills'
-            flags=('--claude-skills-dir',str(claude))
-            preview=self.run_sync(target,shared,root/'no-env','--dry-run',*flags)
-            self.assertEqual(preview.returncode,0,preview.stderr)
-            self.assertFalse(claude.exists())
-            self.assertIn('claude skills: link spring-review',preview.stdout)
-            result=self.run_sync(target,shared,root/'no-env',*flags)
-            self.assertEqual(result.returncode,0,result.stderr)
-            self.assertEqual(preview.stdout,result.stdout)
-            link=claude/'spring-review'
-            self.assertTrue(link.is_symlink())
-            self.assertEqual(link.resolve(),(target/'skills/spring-review').resolve())
-            self.assertFalse((claude/'find-session').exists())
-            self.assertTrue((shared/'find-session').is_symlink())
-            again=self.run_sync(target,shared,root/'no-env',*flags)
-            self.assertEqual(again.stdout.strip(),'No changes.')
-
-    def test_foreign_claude_skill_blocks_before_any_changes(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            root=Path(tmp);target=root/'personal';shared=root/'user-skills';claude=root/'claude-skills'
-            (claude/'commit').mkdir(parents=True)
-            (claude/'commit/SKILL.md').write_text('owned by someone else')
-            result=self.run_sync(target,shared,root/'no-env','--claude-skills-dir',str(claude))
-            self.assertNotEqual(result.returncode,0)
-            self.assertIn('commit',result.stderr)
-            self.assertFalse((target/'config.toml').exists())
-            self.assertFalse(shared.exists())
-            self.assertEqual((claude/'commit/SKILL.md').read_text(),'owned by someone else')
-
     def test_known_shared_account_resolves_content_but_not_auth(self):
         with tempfile.TemporaryDirectory() as tmp:
             root=Path(tmp);primary=root/'personal';other=root/'work'
@@ -195,6 +166,86 @@ command="/custom/node/bin/npx"
             rea=tomllib.loads(plan.output)['mcp_servers']['rea']
             self.assertEqual(rea['command'],'/previous/node/npx')
             self.assertEqual(rea['env']['PATH'],'/previous/node:/usr/bin')
+
+
+FAKE_CLAUDE = '''#!/bin/sh
+printf '%s\\n' "$*" >> "$FAKE_CLAUDE_LOG"
+case "$*" in
+  "plugin marketplace list --json") cat "$FAKE_CLAUDE_MARKETPLACES" ;;
+  "plugin list --json") cat "$FAKE_CLAUDE_PLUGINS" ;;
+esac
+'''
+
+
+class ClaudePluginTests(unittest.TestCase):
+    def test_marketplace_lists_every_managed_skill_except_codex_only(self):
+        self.assertEqual(sync.claude_plugin_skill_drift(ROOT/'codex'), [])
+        listed = json.loads((ROOT/'codex/.claude-plugin/marketplace.json').read_text())['plugins'][0]['skills']
+        self.assertNotIn('./skills/find-session', listed)
+        self.assertIn('./skills/commit', listed)
+
+    def test_commands_register_only_what_is_missing(self):
+        codex = Path('/repo/codex')
+        add = ['plugin', 'marketplace', 'add', str(codex)]
+        install = ['plugin', 'install', 'z@agent-workbench']
+        here = [{'name': 'agent-workbench', 'path': str(codex)}]
+        installed = [{'id': 'z@agent-workbench', 'enabled': False}]
+        self.assertEqual(sync.claude_plugin_commands([], [], codex), [add, install])
+        self.assertEqual(sync.claude_plugin_commands(here, [], codex), [install])
+        self.assertEqual(sync.claude_plugin_commands(here, installed, codex), [])
+        moved = [{'name': 'agent-workbench', 'path': '/old/clone/codex'}]
+        self.assertEqual(sync.claude_plugin_commands(moved, installed, codex),
+                         [['plugin', 'marketplace', 'remove', 'agent-workbench'], add, install])
+
+    def run_sync(self, root, *flags, marketplaces='[]', plugins='[]'):
+        bin_dir = root/'bin'; bin_dir.mkdir(exist_ok=True)
+        fake = bin_dir/'claude'; fake.write_text(FAKE_CLAUDE); fake.chmod(0o755)
+        (root/'marketplaces.json').write_text(marketplaces); (root/'plugins.json').write_text(plugins)
+        env = {k: v for k, v in os.environ.items() if not k.startswith(('MYSQL_READ_', 'REA_'))}
+        env.update(PATH=f"{bin_dir}:{env['PATH']}", AGENT_WORKBENCH_ENV_FILE=str(root/'no-env'),
+                   FAKE_CLAUDE_LOG=str(root/'calls.log'), FAKE_CLAUDE_MARKETPLACES=str(root/'marketplaces.json'),
+                   FAKE_CLAUDE_PLUGINS=str(root/'plugins.json'))
+        return subprocess.run([sys.executable, str(ROOT/'codex/sync.py'), '--target-dir', str(root/'target'), *flags],
+                              env=env, capture_output=True, text=True)
+
+    def calls(self, root):
+        log = root/'calls.log'
+        return [line for line in log.read_text().splitlines() if 'list --json' not in line] if log.exists() else []
+
+    def test_sync_registers_plugin_and_dry_run_only_previews(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            preview = self.run_sync(root, '--claude-plugin', '--dry-run')
+            self.assertEqual(preview.returncode, 0, preview.stderr)
+            self.assertIn('claude plugin: install z@agent-workbench', preview.stdout)
+            self.assertEqual(self.calls(root), [])
+            result = self.run_sync(root, '--claude-plugin')
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(preview.stdout, result.stdout)
+            self.assertEqual(self.calls(root), [f"plugin marketplace add {ROOT/'codex'}",
+                                                'plugin install z@agent-workbench'])
+
+    def test_explicit_target_skips_plugin_without_flag(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            result = self.run_sync(root)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertFalse((root/'calls.log').exists())
+
+    def test_stale_marketplace_skill_list_blocks_before_changes(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); source = root/'repo/codex'
+            shutil.copytree(ROOT/'codex', source, ignore=shutil.ignore_patterns('__pycache__'))
+            (source/'skills/new-skill').mkdir()
+            (source/'skills/new-skill/SKILL.md').write_text('---\nname: new-skill\ndescription: x\n---\n')
+            self.assertEqual(sync.claude_plugin_skill_drift(source), ['missing ./skills/new-skill'])
+            env = dict(os.environ, AGENT_WORKBENCH_ENV_FILE=str(root/'no-env'))
+            result = subprocess.run([sys.executable, str(source/'sync.py'), '--target-dir', str(root/'target'),
+                                     '--claude-plugin'], env=env, capture_output=True, text=True)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn('new-skill', result.stderr)
+            self.assertFalse((root/'target').exists())
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -1,0 +1,45 @@
+{
+  "name": "agent-workbench",
+  "description": "agent-workbench 개인 도구 마켓플레이스",
+  "owner": {
+    "name": "arctrls"
+  },
+  "plugins": [
+    {
+      "name": "z",
+      "source": "./",
+      "description": "agent-workbench 관리 스킬 (Codex 전용 find-session 제외)",
+      "strict": false,
+      "skills": [
+        "./skills/commit",
+        "./skills/copy-teams-table",
+        "./skills/create-production-data-fix",
+        "./skills/csv-to-xlsx",
+        "./skills/dev-deploy",
+        "./skills/domain-modeling",
+        "./skills/finder-reveal",
+        "./skills/gradle-integration-test",
+        "./skills/grill-me",
+        "./skills/grill-with-docs",
+        "./skills/grilling",
+        "./skills/handoff",
+        "./skills/java-code-style-review",
+        "./skills/jira-kickoff",
+        "./skills/kotlin-code-style-review",
+        "./skills/legacy-feature-extension-review",
+        "./skills/markdown-preview",
+        "./skills/md-to-pdf",
+        "./skills/mysql-read",
+        "./skills/narrow-upsert-to-update",
+        "./skills/placed-order-event-sourcing",
+        "./skills/pull-request",
+        "./skills/reverse-engineer-anything",
+        "./skills/session-to-skills",
+        "./skills/spring-design-review",
+        "./skills/spring-review",
+        "./skills/spring-workflow",
+        "./skills/upgrade-springboot"
+      ]
+    }
+  ]
+}
