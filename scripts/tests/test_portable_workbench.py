@@ -131,21 +131,6 @@ class HelperEnvironmentTests(unittest.TestCase):
             self.assertNotEqual(result.returncode,0)
             self.assertIn('MYSQL_READ_DEV_HOST',result.stderr)
 
-    def test_editor_override_preserves_arguments_without_shell_execution(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            root=Path(tmp);log=root/'args.json';marker=root/'must-not-exist'
-            binary=root/'fake editor'
-            binary.write_text('#!'+sys.executable+'\nimport sys,json\nfrom pathlib import Path\nPath('+repr(str(log))+').write_text(json.dumps(sys.argv[1:]))\n')
-            binary.chmod(0o755)
-            envfile=root/'env';envfile.write_text('VOPEN_COMMAND='+str(binary)+'\n')
-            argument='$(touch '+str(marker)+').md'
-            result=subprocess.run([sys.executable,str(ROOT/'codex/skills/vopen/scripts/open-file.py'),argument,'12'],
-                                  capture_output=True,text=True,env=dict(os.environ,AGENT_WORKBENCH_ENV_FILE=str(envfile)))
-            import json
-            self.assertEqual(result.returncode,0,result.stderr)
-            self.assertEqual(json.loads(log.read_text()),[argument,'12'])
-            self.assertFalse(marker.exists())
-
 
 
 class MigrationTests(unittest.TestCase):

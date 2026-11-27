@@ -74,8 +74,6 @@ MYSQL_READ_DEV_PROFILE=default
 | `SPRING_REVIEW_CACHE_DIR` | 선택 | 리뷰 도구 캐시 위치. 기본은 `$XDG_CACHE_HOME/agent-workbench/review-tools` 또는 `~/.cache/agent-workbench/review-tools`. |
 | `XDG_CACHE_HOME` | 선택, `~/.cache` | 도구 캐시 기본 상위 경로. |
 | `JAVA_HOME` | 리뷰 도구용 선택 | 설치한 CLI와 호환되는 JDK. 기본 도구 세트는 Java 17+가 필요합니다. |
-| `VOPEN_COMMAND` | 에디터 스킬 선택, `vopen` | 별도 설치된 에디터 연결 실행 파일. `~` 경로를 지원합니다. |
-| `VLISTEN_COMMAND` | 선택, `vlisten` | 서버 누락 시 안내할 실행 파일. 자동 실행하지 않습니다. |
 | `MD_TO_PDF_OUTPUT_DIR` | 선택, `~/Downloads` | PDF 저장 디렉터리. `~` 경로를 지원합니다. |
 | `BROWSER` | 선택, 사용자 기본 브라우저 | 브라우저 선택 선호. 프로세스 환경에 설정하며 자동화 연결 가능 여부는 따로 확인합니다. |
 
